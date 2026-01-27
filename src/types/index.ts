@@ -21,6 +21,7 @@ export interface Transaction {
   categoryId: Category;
   userId: string;
   date: string;
+  isFixed: boolean;
   createdAt: string;
   updatedAt: string;
 }

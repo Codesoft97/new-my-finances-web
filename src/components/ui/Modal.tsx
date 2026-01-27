@@ -35,11 +35,11 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+      <div
+        className="absolute inset-0 bg-opacity-50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizes[size]} m-4 max-h-[90vh] overflow-hidden`}>
         {/* Header */}
@@ -47,12 +47,12 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
           >
             <X size={20} className="text-gray-600" />
           </button>
         </div>
-        
+
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
           {children}
