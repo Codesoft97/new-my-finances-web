@@ -80,6 +80,7 @@ export const transactionService = {
     type: 'income' | 'expense';
     categoryId: string;
     date?: string;
+    isFixed?: boolean;
   }) => {
     const response = await api.post('/transactions', data);
     return response.data;
@@ -87,6 +88,27 @@ export const transactionService = {
 
   getSummary: async (params?: { month?: number; year?: number }) => {
     const response = await api.get('/transactions/summary', { params });
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: {
+      description?: string;
+      amount?: number;
+      type?: 'income' | 'expense';
+      categoryId?: string;
+      date?: string;
+    }
+  ) => {
+    const response = await api.put(`/transactions/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string, deleteMode: 'single' | 'all' = 'single') => {
+    const response = await api.delete(`/transactions/${id}`, {
+      params: { deleteMode },
+    });
     return response.data;
   },
 };
