@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { Wallet } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, login, loading } = useAuth();
@@ -38,24 +38,24 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)]">Carregando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Wallet className="text-primary-600" size={36} />
-            <h1 className="text-3xl font-bold text-gray-900">Minhas Finanças</h1>
+            <Image src="/logo.png" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
+            <h1 className="text-3xl font-bold text-[var(--color-text)]">DuoFinance</h1>
           </div>
-          <p className="text-gray-600">Entre na sua conta para continuar</p>
+          <p className="text-[var(--color-text-secondary)]">Entre na sua conta para continuar</p>
         </div>
 
         {error && (
@@ -95,9 +95,9 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             Não tem uma conta?{' '}
-            <Link href="/register-family" className="font-medium text-primary-600 hover:text-primary-700">
+            <Link href="/register-family" className="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)]">
               Cadastre-se
             </Link>
           </p>

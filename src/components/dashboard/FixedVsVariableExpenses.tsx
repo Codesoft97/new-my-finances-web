@@ -37,8 +37,8 @@ export default function FixedVsVariableExpenses({ transactions, totalIncome }: F
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Despesas Fixas vs Variáveis</h3>
+    <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
+      <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Despesas Fixas vs Variáveis</h3>
 
       {/* Progress Bar */}
       <div className="mb-6">
@@ -46,7 +46,7 @@ export default function FixedVsVariableExpenses({ transactions, totalIncome }: F
           <span className="text-blue-600 font-medium">Fixas: {fixedPercentage.toFixed(1)}%</span>
           <span className="text-orange-600 font-medium">Variáveis: {variablePercentage.toFixed(1)}%</span>
         </div>
-        <div className="h-4 bg-gray-200 rounded-full overflow-hidden flex">
+        <div className="h-4 bg-[var(--color-border)] rounded-full overflow-hidden flex">
           <div
             className="bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
             style={{ width: `${fixedPercentage}%` }}
@@ -86,11 +86,11 @@ export default function FixedVsVariableExpenses({ transactions, totalIncome }: F
       </div>
 
       {/* Total consumption */}
-      <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+      <div className="mt-4 p-4 bg-[var(--color-bg-elevated)] rounded-xl border border-[var(--color-border)]">
         <div className="flex justify-between items-center">
-          <span className="text-gray-600">Total de despesas</span>
+          <span className="text-[var(--color-text-secondary)]">Total de despesas</span>
           <div className="text-right">
-            <span className="font-bold text-gray-900">{formatCurrency(totalExpenses)}</span>
+            <span className="font-bold text-[var(--color-text)]">{formatCurrency(totalExpenses)}</span>
             <span className={`ml-2 text-sm font-medium ${totalOfIncome > 100 ? 'text-red-600' : totalOfIncome > 80 ? 'text-amber-600' : 'text-green-600'}`}>
               ({totalOfIncome.toFixed(1)}% da receita)
             </span>
