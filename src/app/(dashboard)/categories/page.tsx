@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -23,6 +23,7 @@ export default function CategoriesPage() {
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+  const [selectedType, setSelectedType] = useState<'income' | 'expense'>('expense');
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -44,13 +45,15 @@ export default function CategoriesPage() {
     try {
       await categoryService.create({
         name: data.name,
-        color: selectedColor
+        color: selectedColor,
+        type: selectedType
       });
 
       await loadCategories();
       setIsModalOpen(false);
       reset();
       setSelectedColor(COLORS[0]);
+      setSelectedType('expense');
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao criar categoria');
     } finally {
@@ -76,6 +79,10 @@ export default function CategoriesPage() {
     }
   };
 
+  // Separate categories by type
+  const incomeCategories = categories.filter(c => c.type === 'income');
+  const expenseCategories = categories.filter(c => c.type === 'expense');
+
   return (
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
@@ -95,35 +102,86 @@ export default function CategoriesPage() {
           </Button>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category) => (
-            <div
-              key={category._id}
-              className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: category.color }}
-                  >
-                    <span className="text-2xl">📁</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                    <p className="text-sm text-gray-500">{category.color}</p>
+        {/* Income Categories */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <TrendingUp className="text-green-600" size={20} />
+            Categorias de Receita
+          </h2>
+          {incomeCategories.length === 0 ? (
+            <p className="text-gray-500 text-sm">Nenhuma categoria de receita cadastrada</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {incomeCategories.map((category) => (
+                <div
+                  key={category._id}
+                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: category.color }}
+                      >
+                        <TrendingUp className="text-white" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                        <p className="text-sm text-green-600">Receita</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteClick(category)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDeleteClick(category)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Expense Categories */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <TrendingDown className="text-red-600" size={20} />
+            Categorias de Despesa
+          </h2>
+          {expenseCategories.length === 0 ? (
+            <p className="text-gray-500 text-sm">Nenhuma categoria de despesa cadastrada</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {expenseCategories.map((category) => (
+                <div
+                  key={category._id}
+                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-red-500"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: category.color }}
+                      >
+                        <TrendingDown className="text-white" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                        <p className="text-sm text-red-600">Despesa</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteClick(category)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {categories.length === 0 && (
@@ -143,6 +201,7 @@ export default function CategoriesPage() {
           setIsModalOpen(false);
           reset();
           setSelectedColor(COLORS[0]);
+          setSelectedType('expense');
         }}
         title="Nova Categoria"
       >
@@ -157,6 +216,54 @@ export default function CategoriesPage() {
             })}
           />
 
+          {/* Type Selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <label className={`
+                flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+                ${selectedType === 'income'
+                  ? 'border-green-600 bg-green-50'
+                  : 'border-gray-300 hover:border-gray-400'
+                }
+              `}>
+                <input
+                  type="radio"
+                  value="income"
+                  checked={selectedType === 'income'}
+                  onChange={() => setSelectedType('income')}
+                  className="sr-only"
+                />
+                <TrendingUp size={20} className={selectedType === 'income' ? 'text-green-600' : 'text-gray-400'} />
+                <span className={selectedType === 'income' ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                  Receita
+                </span>
+              </label>
+
+              <label className={`
+                flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+                ${selectedType === 'expense'
+                  ? 'border-red-600 bg-red-50'
+                  : 'border-gray-300 hover:border-gray-400'
+                }
+              `}>
+                <input
+                  type="radio"
+                  value="expense"
+                  checked={selectedType === 'expense'}
+                  onChange={() => setSelectedType('expense')}
+                  className="sr-only"
+                />
+                <TrendingDown size={20} className={selectedType === 'expense' ? 'text-red-600' : 'text-gray-400'} />
+                <span className={selectedType === 'expense' ? 'text-red-600 font-medium' : 'text-gray-600'}>
+                  Despesa
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Cor
@@ -168,7 +275,7 @@ export default function CategoriesPage() {
                   type="button"
                   onClick={() => setSelectedColor(color)}
                   className={`
-                    w-10 h-10 rounded-lg transition-all
+                    w-10 h-10 rounded-lg transition-all cursor-pointer
                     ${selectedColor === color ? 'ring-4 ring-primary-300 scale-110' : ''}
                   `}
                   style={{ backgroundColor: color }}
@@ -186,6 +293,7 @@ export default function CategoriesPage() {
                 setIsModalOpen(false);
                 reset();
                 setSelectedColor(COLORS[0]);
+                setSelectedType('expense');
               }}
             >
               Cancelar

@@ -62,6 +62,68 @@ describe('API Services', () => {
         expect(result).toEqual(response.data);
       });
     });
+
+    describe('registerFamily', () => {
+      it('sends POST request with family and user data', async () => {
+        const familyData = { familyName: 'Família Silva', name: 'João', email: 'joao@test.com', password: '123456' };
+        const response = { data: { user: { name: 'João' }, family: { name: 'Família Silva' }, token: 'token123' } };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await authService.registerFamily(familyData);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/auth/register-family', familyData);
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('addMember', () => {
+      it('sends POST request with member data and password', async () => {
+        const memberData = { name: 'Maria', email: 'maria@test.com', password: '123456' };
+        const response = { data: { user: { name: 'Maria' }, message: 'Membro adicionado' } };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await authService.addMember(memberData);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/auth/add-member', memberData);
+        expect(result).toEqual(response.data);
+      });
+
+      it('sends POST request with sendEmailLink option', async () => {
+        const memberData = { name: 'Maria', email: 'maria@test.com', sendEmailLink: true };
+        const response = { data: { user: { name: 'Maria' }, setupUrl: 'http://localhost/setup?token=abc' } };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await authService.addMember(memberData);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/auth/add-member', memberData);
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('setupPassword', () => {
+      it('sends POST request with token and password', async () => {
+        const setupData = { token: 'abc123', password: 'newpassword' };
+        const response = { data: { message: 'Senha configurada' } };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await authService.setupPassword(setupData);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/auth/setup-password', setupData);
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('getFamily', () => {
+      it('sends GET request to fetch family data', async () => {
+        const response = { data: { family: { id: '1', name: 'Família Silva', memberCount: 2, members: [] } } };
+        mockedAxios.get.mockResolvedValueOnce(response);
+
+        const result = await authService.getFamily();
+
+        expect(mockedAxios.get).toHaveBeenCalledWith('/auth/family');
+        expect(result).toEqual(response.data);
+      });
+    });
   });
 
   describe('categoryService', () => {
@@ -72,14 +134,14 @@ describe('API Services', () => {
 
         const result = await categoryService.list();
 
-        expect(mockedAxios.get).toHaveBeenCalledWith('/categories');
+        expect(mockedAxios.get).toHaveBeenCalledWith('/categories', { params: {} });
         expect(result).toEqual(response.data);
       });
     });
 
     describe('create', () => {
       it('sends POST request with category data', async () => {
-        const categoryData = { name: 'Transport', color: '#00ff00' };
+        const categoryData = { name: 'Transport', color: '#00ff00', type: 'expense' as const };
         const response = { data: { category: { ...categoryData, _id: '2' } } };
         mockedAxios.post.mockResolvedValueOnce(response);
 
