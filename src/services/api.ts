@@ -49,15 +49,35 @@ export const authService = {
     const response = await api.get('/auth/me');
     return response.data;
   },
-};
 
-export const categoryService = {
-  list: async () => {
-    const response = await api.get('/categories');
+  registerFamily: async (data: { familyName: string; name: string; email: string; password: string }) => {
+    const response = await api.post('/auth/register-family', data);
     return response.data;
   },
 
-  create: async (data: { name: string; color: string }) => {
+  addMember: async (data: { name: string; email: string; password?: string; sendEmailLink?: boolean }) => {
+    const response = await api.post('/auth/add-member', data);
+    return response.data;
+  },
+
+  setupPassword: async (data: { token: string; password: string }) => {
+    const response = await api.post('/auth/setup-password', data);
+    return response.data;
+  },
+
+  getFamily: async () => {
+    const response = await api.get('/auth/family');
+    return response.data;
+  },
+};
+
+export const categoryService = {
+  list: async (type?: 'income' | 'expense') => {
+    const response = await api.get('/categories', { params: type ? { type } : {} });
+    return response.data;
+  },
+
+  create: async (data: { name: string; color: string; type: 'income' | 'expense' }) => {
     const response = await api.post('/categories', data);
     return response.data;
   },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
@@ -29,21 +29,43 @@ export default function TransactionsPage() {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
+  // Get today's date in YYYY-MM-DD format for the date input
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
       description: '',
       amount: '',
       type: 'expense' as 'income' | 'expense',
       categoryId: '',
-      isFixed: false
+      isFixed: false,
+      date: getTodayDate()
     }
   });
 
   const transactionType = watch('type');
 
+  // Filter categories based on transaction type
+  const filteredCategories = categories.filter(c => c.type === transactionType);
+
   useEffect(() => {
     loadCategories();
   }, []);
+
+  // Clear category selection when transaction type changes (except when editing or initial mount)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!editingTransaction) {
+      setValue('categoryId', '');
+    }
+  }, [transactionType, setValue, editingTransaction]);
 
   useEffect(() => {
     loadData();
@@ -80,7 +102,8 @@ export default function TransactionsPage() {
           description: data.description,
           amount: parseFloat(data.amount),
           type: data.type,
-          categoryId: data.categoryId
+          categoryId: data.categoryId,
+          date: data.date
         });
       } else {
         await transactionService.create({
@@ -88,7 +111,8 @@ export default function TransactionsPage() {
           amount: parseFloat(data.amount),
           type: data.type,
           categoryId: data.categoryId,
-          isFixed: data.isFixed
+          isFixed: data.isFixed,
+          date: data.date
         });
       }
 
@@ -106,8 +130,9 @@ export default function TransactionsPage() {
     setValue('description', transaction.description);
     setValue('amount', transaction.amount.toString());
     setValue('type', transaction.type);
-    setValue('categoryId', transaction.categoryId._id);
+    setValue('categoryId', transaction.categoryId?._id || '');
     setValue('isFixed', transaction.isFixed);
+    setValue('date', transaction.date.split('T')[0]);
     setIsModalOpen(true);
   };
 
@@ -146,7 +171,9 @@ export default function TransactionsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    // Parse the date string manually to avoid timezone issues
+    const [year, month, day] = dateString.split('T')[0].split('-');
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -227,7 +254,7 @@ export default function TransactionsPage() {
                     <div className="flex items-center gap-4">
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: transaction.categoryId.color }}
+                        style={{ backgroundColor: transaction.categoryId?.color || '#6B7280' }}
                       >
                         {transaction.type === 'income' ? (
                           <TrendingUp className="text-white" size={20} />
@@ -245,7 +272,7 @@ export default function TransactionsPage() {
                           )}
                         </div>
                         <p className="text-sm text-gray-500">
-                          {transaction.categoryId.name} • {formatDate(transaction.date)}
+                          {transaction.categoryId?.name || 'Sem categoria'} • {formatDate(transaction.date)}
                         </p>
                       </div>
                     </div>
@@ -318,6 +345,20 @@ export default function TransactionsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Data
+            </label>
+            <input
+              type="date"
+              {...register('date', { required: 'Data é obrigatória' })}
+              className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 font-medium cursor-pointer"
+            />
+            {errors.date && (
+              <p className="mt-2 text-sm text-red-600">{errors.date.message as string}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Tipo
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -357,21 +398,32 @@ export default function TransactionsPage() {
             </label>
             <select
               {...register('categoryId', { required: 'Categoria é obrigatória' })}
-              className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500"
+              className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 font-medium appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.75rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
             >
-              <option value="">Selecione uma categoria</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
-              ))}
+              <option value="" className="text-gray-500">Selecione uma categoria</option>
+              {filteredCategories.length === 0 ? (
+                <option value="" disabled className="text-gray-400">Nenhuma categoria de {transactionType === 'income' ? 'receita' : 'despesa'}</option>
+              ) : (
+                filteredCategories.map((category) => (
+                  <option key={category._id} value={category._id} className="text-gray-900 py-2">
+                    {category.name}
+                  </option>
+                ))
+              )}
             </select>
             {errors.categoryId && (
               <p className="mt-2 text-sm text-red-600">{errors.categoryId.message as string}</p>
             )}
           </div>
 
-          {/* Fixed Expense Checkbox - Only show when creating */}
+          {/* Fixed Transaction Checkbox - Only show when creating */}
           {!editingTransaction && (
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <input
@@ -381,9 +433,13 @@ export default function TransactionsPage() {
                 className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
               />
               <label htmlFor="isFixed" className="cursor-pointer">
-                <span className="font-medium text-gray-900">Despesa Fixa</span>
+                <span className="font-medium text-gray-900">
+                  {transactionType === 'income' ? 'Receita Fixa' : 'Despesa Fixa'}
+                </span>
                 <p className="text-sm text-gray-500">
-                  Esta despesa será repetida automaticamente todos os meses
+                  {transactionType === 'income'
+                    ? 'Esta receita será repetida automaticamente todos os meses'
+                    : 'Esta despesa será repetida automaticamente todos os meses'}
                 </p>
               </label>
             </div>
@@ -393,7 +449,7 @@ export default function TransactionsPage() {
           {editingTransaction && editingTransaction.isFixed && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">
-                <strong>Nota:</strong> Esta é uma despesa fixa. A alteração afetará apenas esta ocorrência.
+                <strong>Nota:</strong> Esta é uma {editingTransaction.type === 'income' ? 'receita' : 'despesa'} fixa. A alteração afetará apenas esta ocorrência.
               </p>
             </div>
           )}
