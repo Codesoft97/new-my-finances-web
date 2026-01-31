@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import CurrencyInput from '@/components/ui/CurrencyInput';
 import Modal from '@/components/ui/Modal';
 import { transactionService, categoryService } from '@/services/api';
 import { Transaction, TransactionSummary, Category } from '@/types';
@@ -35,7 +36,7 @@ export default function TransactionsPage() {
     return today.toISOString().split('T')[0];
   };
 
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors } } = useForm({
     defaultValues: {
       description: '',
       amount: '',
@@ -181,10 +182,10 @@ export default function TransactionsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
             Transações
           </h1>
-          <p className="text-gray-600">
+          <p className="text-[var(--color-text-secondary)]">
             Controle suas receitas e despesas
           </p>
         </div>
@@ -217,7 +218,7 @@ export default function TransactionsPage() {
         </div>
 
         {/* Month Filter */}
-        <div className="bg-white rounded-xl p-4 shadow-md mb-6">
+        <div className="bg-[var(--color-bg-card)] rounded-xl p-4 shadow-md mb-6">
           <div className="flex items-center gap-4 overflow-x-auto">
             {MONTHS.map((month, index) => (
               <button
@@ -226,8 +227,8 @@ export default function TransactionsPage() {
                 className={`
                   px-6 py-2 rounded-lg font-medium whitespace-nowrap cursor-pointer transition-all
                   ${selectedMonth === index + 1
-                    ? 'bg-gray-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]'
                   }
                 `}
               >
@@ -238,18 +239,18 @@ export default function TransactionsPage() {
         </div>
 
         {/* Transactions List */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-[var(--color-bg-card)] rounded-xl shadow-md overflow-hidden">
           {transactions.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">Nenhuma transação encontrada</p>
+              <p className="text-[var(--color-text-muted)] mb-4">Nenhuma transação encontrada</p>
               <Button onClick={() => setIsModalOpen(true)} variant="outline">
                 Criar primeira transação
               </Button>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-[var(--color-border)]">
               {transactions.map((transaction) => (
-                <div key={transaction._id} className="p-4 hover:bg-gray-50 transition-colors group">
+                <div key={transaction._id} className="p-4 hover:bg-[var(--color-bg-elevated)] transition-colors group">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div
@@ -264,14 +265,14 @@ export default function TransactionsPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900">{transaction.description}</h3>
+                          <h3 className="font-semibold text-[var(--color-text)]">{transaction.description}</h3>
                           {transaction.isFixed && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-0.5 rounded-full font-medium">
                               Fixa
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-[var(--color-text-muted)]">
                           {transaction.categoryId?.name || 'Sem categoria'} • {formatDate(transaction.date)}
                         </p>
                       </div>
@@ -284,14 +285,14 @@ export default function TransactionsPage() {
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEditModal(transaction)}
-                          className="p-2 rounded-lg hover:bg-blue-100 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg hover:bg-[var(--color-primary-light)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                           title="Editar"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => openDeleteModal(transaction)}
-                          className="p-2 rounded-lg hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg hover:bg-[var(--color-danger-light)] text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                           title="Deletar"
                         >
                           <Trash2 size={18} />
@@ -309,7 +310,7 @@ export default function TransactionsPage() {
       {/* Floating Action Button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl hover:bg-blue-700 transition-all hover:scale-110 cursor-pointer flex items-center justify-center z-50"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-[var(--color-action)] text-white rounded-full shadow-2xl hover:bg-[var(--color-action-dark)] transition-all hover:scale-110 cursor-pointer flex items-center justify-center z-50"
       >
         <Plus size={32} />
       </button>
@@ -331,47 +332,53 @@ export default function TransactionsPage() {
             })}
           />
 
-          <Input
-            label="Valor"
-            type="number"
-            step="0.01"
-            placeholder="0.00"
-            error={errors.amount?.message as string}
-            {...register('amount', {
+          <Controller
+            name="amount"
+            control={control}
+            rules={{
               required: 'Valor é obrigatório',
-              min: { value: 0.01, message: 'Valor deve ser maior que zero' }
-            })}
+              validate: (value) => parseFloat(value) > 0 || 'Valor deve ser maior que zero'
+            }}
+            render={({ field: { onChange, value } }) => (
+              <CurrencyInput
+                label="Valor"
+                value={value}
+                onChange={onChange}
+                error={errors.amount?.message as string}
+                placeholder="0,00"
+              />
+            )}
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Data
             </label>
             <input
               type="date"
               {...register('date', { required: 'Data é obrigatória' })}
-              className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 font-medium cursor-pointer"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
             />
             {errors.date && (
-              <p className="mt-2 text-sm text-red-600">{errors.date.message as string}</p>
+              <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.date.message as string}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Tipo
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${transactionType === 'income'
-                  ? 'border-green-600 bg-green-50'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-[var(--color-success)] bg-[var(--color-success)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
                 }
               `}>
                 <input type="radio" value="income" {...register('type')} className="sr-only" />
-                <TrendingUp size={20} className={transactionType === 'income' ? 'text-green-600' : 'text-gray-400'} />
-                <span className={transactionType === 'income' ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                <TrendingUp size={20} className={transactionType === 'income' ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'} />
+                <span className={transactionType === 'income' ? 'text-[var(--color-success)] font-medium' : 'text-[var(--color-text-secondary)]'}>
                   Receita
                 </span>
               </label>
@@ -379,13 +386,13 @@ export default function TransactionsPage() {
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${transactionType === 'expense'
-                  ? 'border-red-600 bg-red-50'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-[var(--color-danger)] bg-[var(--color-danger)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
                 }
               `}>
                 <input type="radio" value="expense" {...register('type')} className="sr-only" />
-                <TrendingDown size={20} className={transactionType === 'expense' ? 'text-red-600' : 'text-gray-400'} />
-                <span className={transactionType === 'expense' ? 'text-red-600 font-medium' : 'text-gray-600'}>
+                <TrendingDown size={20} className={transactionType === 'expense' ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-muted)]'} />
+                <span className={transactionType === 'expense' ? 'text-[var(--color-danger)] font-medium' : 'text-[var(--color-text-secondary)]'}>
                   Despesa
                 </span>
               </label>
@@ -393,12 +400,12 @@ export default function TransactionsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Categoria
             </label>
             <select
               {...register('categoryId', { required: 'Categoria é obrigatória' })}
-              className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 font-medium appearance-none cursor-pointer"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium appearance-none cursor-pointer"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: 'right 0.75rem center',
@@ -407,36 +414,36 @@ export default function TransactionsPage() {
                 paddingRight: '2.5rem'
               }}
             >
-              <option value="" className="text-gray-500">Selecione uma categoria</option>
+              <option value="">Selecione uma categoria</option>
               {filteredCategories.length === 0 ? (
-                <option value="" disabled className="text-gray-400">Nenhuma categoria de {transactionType === 'income' ? 'receita' : 'despesa'}</option>
+                <option value="" disabled>Nenhuma categoria de {transactionType === 'income' ? 'receita' : 'despesa'}</option>
               ) : (
                 filteredCategories.map((category) => (
-                  <option key={category._id} value={category._id} className="text-gray-900 py-2">
+                  <option key={category._id} value={category._id}>
                     {category.name}
                   </option>
                 ))
               )}
             </select>
             {errors.categoryId && (
-              <p className="mt-2 text-sm text-red-600">{errors.categoryId.message as string}</p>
+              <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.categoryId.message as string}</p>
             )}
           </div>
 
           {/* Fixed Transaction Checkbox - Only show when creating */}
           {!editingTransaction && (
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-elevated)] rounded-lg border border-[var(--color-border)]">
               <input
                 type="checkbox"
                 id="isFixed"
                 {...register('isFixed')}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer"
               />
               <label htmlFor="isFixed" className="cursor-pointer">
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-[var(--color-text)]">
                   {transactionType === 'income' ? 'Receita Fixa' : 'Despesa Fixa'}
                 </span>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[var(--color-text-muted)]">
                   {transactionType === 'income'
                     ? 'Esta receita será repetida automaticamente todos os meses'
                     : 'Esta despesa será repetida automaticamente todos os meses'}
@@ -447,8 +454,8 @@ export default function TransactionsPage() {
 
           {/* Info for fixed transactions in edit mode */}
           {editingTransaction && editingTransaction.isFixed && (
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-700">
+            <div className="p-4 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/30">
+              <p className="text-sm text-[var(--color-text)]">
                 <strong>Nota:</strong> Esta é uma {editingTransaction.type === 'income' ? 'receita' : 'despesa'} fixa. A alteração afetará apenas esta ocorrência.
               </p>
             </div>

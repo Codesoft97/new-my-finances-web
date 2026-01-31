@@ -60,18 +60,18 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
 
   if (topCategories.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Onde Economizar</h3>
-        <p className="text-gray-500 text-center py-8">Sem dados suficientes</p>
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Onde Economizar</h3>
+        <p className="text-[var(--color-text-muted)] text-center py-8">Sem dados suficientes</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="text-amber-500" size={20} />
-        <h3 className="text-lg font-semibold text-gray-900">Onde Economizar</h3>
+        <h3 className="text-lg font-semibold text-[var(--color-text)]">Onde Economizar</h3>
       </div>
 
       {/* Warning for high spending */}
@@ -97,9 +97,9 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
         {topCategories.map((cat, index) => (
           <div
             key={cat.categoryId}
-            className={`flex items-center gap-3 p-3 rounded-lg ${cat.percentageOfIncome > 30 ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}
+            className={`flex items-center gap-3 p-3 rounded-lg ${cat.percentageOfIncome > 30 ? 'bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30' : 'bg-[var(--color-bg-elevated)]'}`}
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-600 text-sm font-bold">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-border)] text-[var(--color-text-secondary)] text-sm font-bold">
               {index + 1}
             </div>
             <div
@@ -108,11 +108,11 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900 truncate">{cat.categoryName}</span>
-                <span className="font-bold text-gray-900 ml-2">{formatCurrency(cat.total)}</span>
+                <span className="font-medium text-[var(--color-text)] truncate">{cat.categoryName}</span>
+                <span className="font-bold text-[var(--color-text)] ml-2">{formatCurrency(cat.total)}</span>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <div className="flex-1 h-2 bg-gray-200 rounded-full mr-3">
+                <div className="flex-1 h-2 bg-[var(--color-border)] rounded-full mr-3">
                   <div
                     className={`h-2 rounded-full transition-all ${cat.percentageOfIncome > 30 ? 'bg-red-500' : cat.percentageOfIncome > 20 ? 'bg-amber-500' : 'bg-green-500'}`}
                     style={{ width: `${Math.min(cat.percentageOfIncome, 100)}%` }}
@@ -131,8 +131,8 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
       </div>
 
       {/* Savings tip */}
-      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-        <p className="text-sm text-green-800">
+      <div className="mt-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)]/30 rounded-lg">
+        <p className="text-sm text-[var(--color-text)]">
           💡 <strong>Dica:</strong> Categorias acima de 30% da receita merecem atenção especial. Considere revisar esses gastos.
         </p>
       </div>

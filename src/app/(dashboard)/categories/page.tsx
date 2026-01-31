@@ -89,10 +89,10 @@ export default function CategoriesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
               Categorias
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[var(--color-text-secondary)]">
               Organize suas transações por categorias
             </p>
           </div>
@@ -104,18 +104,18 @@ export default function CategoriesPage() {
 
         {/* Income Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingUp className="text-green-600" size={20} />
+          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+            <TrendingUp className="text-[var(--color-success)]" size={20} />
             Categorias de Receita
           </h2>
           {incomeCategories.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhuma categoria de receita cadastrada</p>
+            <p className="text-[var(--color-text-muted)] text-sm">Nenhuma categoria de receita cadastrada</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {incomeCategories.map((category) => (
                 <div
                   key={category._id}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"
+                  className="bg-[var(--color-bg-card)] rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-[var(--color-success)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -126,13 +126,13 @@ export default function CategoriesPage() {
                         <TrendingUp className="text-white" size={20} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                        <p className="text-sm text-green-600">Receita</p>
+                        <h3 className="font-semibold text-[var(--color-text)]">{category.name}</h3>
+                        <p className="text-sm text-[var(--color-success)]">Receita</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteClick(category)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -145,18 +145,18 @@ export default function CategoriesPage() {
 
         {/* Expense Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingDown className="text-red-600" size={20} />
+          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+            <TrendingDown className="text-[var(--color-danger)]" size={20} />
             Categorias de Despesa
           </h2>
           {expenseCategories.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhuma categoria de despesa cadastrada</p>
+            <p className="text-[var(--color-text-muted)] text-sm">Nenhuma categoria de despesa cadastrada</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {expenseCategories.map((category) => (
                 <div
                   key={category._id}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-red-500"
+                  className="bg-[var(--color-bg-card)] rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-[var(--color-danger)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -167,13 +167,13 @@ export default function CategoriesPage() {
                         <TrendingDown className="text-white" size={20} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                        <p className="text-sm text-red-600">Despesa</p>
+                        <h3 className="font-semibold text-[var(--color-text)]">{category.name}</h3>
+                        <p className="text-sm text-[var(--color-danger)]">Despesa</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteClick(category)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -186,7 +186,7 @@ export default function CategoriesPage() {
 
         {categories.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Nenhuma categoria cadastrada</p>
+            <p className="text-[var(--color-text-muted)] mb-4">Nenhuma categoria cadastrada</p>
             <Button onClick={() => setIsModalOpen(true)} variant="outline">
               Criar primeira categoria
             </Button>
@@ -218,15 +218,15 @@ export default function CategoriesPage() {
 
           {/* Type Selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Tipo
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${selectedType === 'income'
-                  ? 'border-green-600 bg-green-50'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-[var(--color-success)] bg-[var(--color-success)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
                 }
               `}>
                 <input
@@ -236,8 +236,8 @@ export default function CategoriesPage() {
                   onChange={() => setSelectedType('income')}
                   className="sr-only"
                 />
-                <TrendingUp size={20} className={selectedType === 'income' ? 'text-green-600' : 'text-gray-400'} />
-                <span className={selectedType === 'income' ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                <TrendingUp size={20} className={selectedType === 'income' ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'} />
+                <span className={selectedType === 'income' ? 'text-[var(--color-success)] font-medium' : 'text-[var(--color-text-secondary)]'}>
                   Receita
                 </span>
               </label>
@@ -245,8 +245,8 @@ export default function CategoriesPage() {
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${selectedType === 'expense'
-                  ? 'border-red-600 bg-red-50'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-[var(--color-danger)] bg-[var(--color-danger)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
                 }
               `}>
                 <input
@@ -256,8 +256,8 @@ export default function CategoriesPage() {
                   onChange={() => setSelectedType('expense')}
                   className="sr-only"
                 />
-                <TrendingDown size={20} className={selectedType === 'expense' ? 'text-red-600' : 'text-gray-400'} />
-                <span className={selectedType === 'expense' ? 'text-red-600 font-medium' : 'text-gray-600'}>
+                <TrendingDown size={20} className={selectedType === 'expense' ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-muted)]'} />
+                <span className={selectedType === 'expense' ? 'text-[var(--color-danger)] font-medium' : 'text-[var(--color-text-secondary)]'}>
                   Despesa
                 </span>
               </label>
@@ -265,7 +265,7 @@ export default function CategoriesPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-3">
               Cor
             </label>
             <div className="grid grid-cols-10 gap-2">

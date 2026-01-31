@@ -54,10 +54,10 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-[var(--color-text)] mb-2">
             Olá, {user?.name}! 👋
           </h1>
-          <p className="text-gray-600">
+          <p className="text-[var(--color-text-secondary)]">
             Confira seu resumo financeiro de {currentMonth}
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function DashboardPage() {
         {/* Analytics Section */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
