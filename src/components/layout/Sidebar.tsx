@@ -57,7 +57,7 @@ export default function Sidebar() {
           <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
             {isExpanded && (
               <div className="flex items-center gap-2">
-                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-xl" />
+                <Image src="/logo.svg" alt="DuoFinance" width={50} height={50} className="rounded-xl" />
                 <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
                   DuoFinance
                 </h1>
@@ -65,7 +65,7 @@ export default function Sidebar() {
             )}
             {!isExpanded && (
               <div className="w-full flex justify-center">
-                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-xl" />
+                <Image src="/logo.svg" alt="DuoFinance" width={60} height={60} className="rounded-xl" />
               </div>
             )}
           </div>

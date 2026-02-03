@@ -74,7 +74,7 @@ export default function RegisterPage() {
       <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
+            <Image src="/logo.svg" alt="DuoFinance" width={60} height={60} className="rounded-lg" />
             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">DuoFinance</h1>
           </div>
           <p className="text-[var(--color-text-secondary)]">Crie sua conta para começar</p>
