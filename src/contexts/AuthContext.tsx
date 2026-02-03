@@ -2,19 +2,30 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/api';
 import { User, Family, AuthContextType } from '@/types';
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+
+// Check if secure auth is enabled
+const isSecureAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_SECURE_AUTH === 'true';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [family, setFamily] = useState<Family | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    loadUserFromStorage();
+    if (isSecureAuthEnabled) {
+      // Verify session via API call
+      checkAuth();
+    } else {
+      // Fallback: load from localStorage
+      loadUserFromStorage();
+    }
   }, []);
 
   const loadUserFromStorage = () => {
@@ -36,15 +47,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const checkAuth = async () => {
+    try {
+      const data = await authService.getMe();
+      setUser(data.user);
+      if (data.family) {
+        setFamily(data.family);
+      }
+    } catch (error) {
+      // No valid session
+      setUser(null);
+      setFamily(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const refreshFamily = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!isSecureAuthEnabled) {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+      }
 
       const data = await authService.getFamily();
       if (data.family) {
         setFamily(data.family);
-        localStorage.setItem('family', JSON.stringify(data.family));
+        if (!isSecureAuthEnabled) {
+          localStorage.setItem('family', JSON.stringify(data.family));
+        }
       }
     } catch (error) {
       console.error('Erro ao atualizar família:', error);
@@ -55,16 +86,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await authService.login({ email, password });
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      if (data.family) {
-        localStorage.setItem('family', JSON.stringify(data.family));
-        setFamily(data.family);
+      if (!isSecureAuthEnabled) {
+        // Fallback: store in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (data.family) {
+          localStorage.setItem('family', JSON.stringify(data.family));
+        }
       }
 
       setUser(data.user);
-      router.push('/');
+      if (data.family) {
+        setFamily(data.family);
+      }
 
+      router.push('/');
       return { success: true };
     } catch (error: any) {
       return {
@@ -78,16 +114,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await authService.register({ name, email, password });
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      if (data.family) {
-        localStorage.setItem('family', JSON.stringify(data.family));
-        setFamily(data.family);
+      if (!isSecureAuthEnabled) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (data.family) {
+          localStorage.setItem('family', JSON.stringify(data.family));
+        }
       }
 
       setUser(data.user);
-      router.push('/');
+      if (data.family) {
+        setFamily(data.family);
+      }
 
+      router.push('/');
       return { success: true };
     } catch (error: any) {
       return {
@@ -101,16 +141,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await authService.registerFamily({ familyName, name, email, password });
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      if (data.family) {
-        localStorage.setItem('family', JSON.stringify(data.family));
-        setFamily(data.family);
+      if (!isSecureAuthEnabled) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (data.family) {
+          localStorage.setItem('family', JSON.stringify(data.family));
+        }
       }
 
       setUser(data.user);
-      router.push('/');
+      if (data.family) {
+        setFamily(data.family);
+      }
 
+      router.push('/');
       return { success: true };
     } catch (error: any) {
       return {
@@ -124,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await authService.addMember({ name, email, password, sendEmailLink });
 
-      // Refresh family to get updated member list (don't let this fail the whole operation)
+      // Refresh family to get updated member list
       try {
         await refreshFamily();
       } catch (refreshError) {
@@ -143,10 +187,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('family');
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+
+    // Clear React Query cache for security (prevent data leakage)
+    queryClient.clear();
+
+    if (!isSecureAuthEnabled) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('family');
+    }
+
     setUser(null);
     setFamily(null);
     router.push('/login');

@@ -5,8 +5,10 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Button from '@/components/ui/Button';
 import { CheckCircle, Copy, Check } from 'lucide-react';
+import { validatePassword } from '@/utils/passwordValidator';
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -159,14 +161,17 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
         </div>
 
         {!sendEmailLink && (
-          <Input
+          <PasswordInput
             label="Senha"
-            type="password"
             placeholder="••••••••"
             error={errors.password?.message as string}
             {...register('password', {
               required: sendEmailLink ? false : 'Senha é obrigatória',
-              minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+              validate: (value: string) => {
+                if (sendEmailLink) return true;
+                const result = validatePassword(value);
+                return result.isValid || result.errors[0];
+              }
             })}
           />
         )}

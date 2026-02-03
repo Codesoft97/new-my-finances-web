@@ -7,8 +7,10 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { authService } from '@/services/api';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Button from '@/components/ui/Button';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { validatePassword } from '@/utils/passwordValidator';
 
 function SetupPasswordForm() {
   const router = useRouter();
@@ -86,14 +88,16 @@ function SetupPasswordForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <Input
+            <PasswordInput
               label="Nova Senha"
-              type="password"
               placeholder="••••••••"
               error={errors.password?.message as string}
               {...register('password', {
                 required: 'Senha é obrigatória',
-                minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+                validate: (value: string) => {
+                  const result = validatePassword(value);
+                  return result.isValid || result.errors[0];
+                }
               })}
             />
 
