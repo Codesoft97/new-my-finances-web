@@ -51,6 +51,7 @@ export interface AuthContextType {
   family: Family | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  loginWithGoogle: (idToken: string) => Promise<{ success: boolean; message?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   registerFamily: (familyName: string, name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   addMember: (name: string, email: string, password?: string, sendEmailLink?: boolean) => Promise<{ success: boolean; message?: string; setupUrl?: string }>;

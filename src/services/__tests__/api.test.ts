@@ -124,6 +124,26 @@ describe('API Services', () => {
         expect(result).toEqual(response.data);
       });
     });
+
+    describe('loginWithGoogle', () => {
+      it('sends POST request with Google idToken', async () => {
+        const idToken = 'google-id-token-123';
+        const response = {
+          data: {
+            message: 'Login com Google realizado com sucesso',
+            user: { id: '1', name: 'João', email: 'joao@gmail.com' },
+            family: { id: '2', name: 'Família de João', memberCount: 1 },
+            token: 'token123'
+          }
+        };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await authService.loginWithGoogle(idToken);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/auth/google', { idToken });
+        expect(result).toEqual(response.data);
+      });
+    });
   });
 
   describe('categoryService', () => {

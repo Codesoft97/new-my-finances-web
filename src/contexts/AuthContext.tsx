@@ -110,6 +110,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    try {
+      const data = await authService.loginWithGoogle(idToken);
+
+      if (!isSecureAuthEnabled) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (data.family) {
+          localStorage.setItem('family', JSON.stringify(data.family));
+        }
+      }
+
+      setUser(data.user);
+      if (data.family) {
+        setFamily(data.family);
+      }
+
+      router.push('/');
+      return { success: true };
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      let message = error.response?.data?.message || 'Erro ao fazer login com Google';
+
+      if (code === 'EMAIL_EXISTS_LOCAL') {
+        message = 'Este email já está cadastrado com senha. Por favor, faça login com email e senha.';
+      }
+
+      return {
+        success: false,
+        message
+      };
+    }
+  };
+
   const register = async (name: string, email: string, password: string) => {
     try {
       const data = await authService.register({ name, email, password });
@@ -209,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, family, loading, login, register, registerFamily, addMember, logout, refreshFamily }}>
+    <AuthContext.Provider value={{ user, family, loading, login, loginWithGoogle, register, registerFamily, addMember, logout, refreshFamily }}>
       {children}
     </AuthContext.Provider>
   );

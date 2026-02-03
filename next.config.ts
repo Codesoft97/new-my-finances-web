@@ -31,15 +31,20 @@ const nextConfig: NextConfig = {
             value: 'max-age=31536000; includeSubDomains'
           },
           {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups'
+          },
+          {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com",
+              "style-src 'self' 'unsafe-inline' https://accounts.google.com",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               // Use base URL (without /api) to allow all API paths
-              `connect-src 'self' ${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '')}`,
+              `connect-src 'self' ${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '')} https://accounts.google.com https://oauth2.googleapis.com`,
+              "frame-src https://accounts.google.com",
               "frame-ancestors 'none'"
             ].join('; ')
           }

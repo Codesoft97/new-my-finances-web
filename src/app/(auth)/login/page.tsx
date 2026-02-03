@@ -8,12 +8,14 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 
 export default function LoginPage() {
-  const { user, login, loading } = useAuth();
+  const { user, login, loginWithGoogle, loading } = useAuth();
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -34,6 +36,23 @@ export default function LoginPage() {
     }
 
     setIsLoading(false);
+  };
+
+  const handleGoogleSuccess = async (idToken: string) => {
+    setIsGoogleLoading(true);
+    setError('');
+
+    const result = await loginWithGoogle(idToken);
+
+    if (!result.success) {
+      setError(result.message || 'Erro ao fazer login com Google');
+    }
+
+    setIsGoogleLoading(false);
+  };
+
+  const handleGoogleError = (message: string) => {
+    setError(message);
   };
 
   if (loading || user) {
@@ -89,10 +108,23 @@ export default function LoginPage() {
             })}
           />
 
-          <Button type="submit" fullWidth disabled={isLoading}>
+          <Button type="submit" fullWidth disabled={isLoading || isGoogleLoading}>
             {isLoading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
+
+        <div className="my-6 flex items-center gap-4">
+          <div className="flex-1 h-px bg-[var(--color-border)]"></div>
+          <span className="text-sm text-[var(--color-text-secondary)]">ou</span>
+          <div className="flex-1 h-px bg-[var(--color-border)]"></div>
+        </div>
+
+        <div className={isGoogleLoading ? 'opacity-50 pointer-events-none' : ''}>
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-[var(--color-text-secondary)]">
