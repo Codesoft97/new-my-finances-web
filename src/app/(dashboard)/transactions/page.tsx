@@ -1,14 +1,21 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import Modal from '@/components/ui/Modal';
-import { transactionService, categoryService } from '@/services/api';
-import { Transaction, TransactionSummary, Category } from '@/types';
+import { Transaction } from '@/types';
+import {
+  useTransactions,
+  useTransactionSummary,
+  useCreateTransaction,
+  useUpdateTransaction,
+  useDeleteTransaction
+} from '@/hooks/useTransactions';
+import { useCategories } from '@/hooks/useCategories';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -16,19 +23,27 @@ const MONTHS = [
 ];
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [summary, setSummary] = useState<TransactionSummary>({ income: 0, expense: 0, balance: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  // React Query hooks
+  const { data: transactionsData } = useTransactions(selectedMonth, selectedYear);
+  const { data: summaryData } = useTransactionSummary(selectedMonth, selectedYear);
+  const { data: categoriesData } = useCategories();
+
+  const createMutation = useCreateTransaction();
+  const updateMutation = useUpdateTransaction();
+  const deleteMutation = useDeleteTransaction();
+
+  const transactions = transactionsData?.transactions ?? [];
+  const summary = summaryData?.summary ?? { income: 0, expense: 0, balance: 0 };
+  const categories = categoriesData?.categories ?? [];
 
   // Get today's date in YYYY-MM-DD format for the date input
   const getTodayDate = () => {
@@ -52,10 +67,6 @@ export default function TransactionsPage() {
   // Filter categories based on transaction type
   const filteredCategories = categories.filter(c => c.type === transactionType);
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
   // Clear category selection when transaction type changes (except when editing or initial mount)
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -68,46 +79,21 @@ export default function TransactionsPage() {
     }
   }, [transactionType, setValue, editingTransaction]);
 
-  useEffect(() => {
-    loadData();
-  }, [selectedMonth, selectedYear]);
-
-  const loadCategories = async () => {
-    try {
-      const data = await categoryService.list();
-      setCategories(data.categories);
-    } catch (error) {
-      console.error('Erro ao carregar categorias:', error);
-    }
-  };
-
-  const loadData = async () => {
-    try {
-      const [transactionsData, summaryData] = await Promise.all([
-        transactionService.list({ month: selectedMonth, year: selectedYear }),
-        transactionService.getSummary({ month: selectedMonth, year: selectedYear })
-      ]);
-
-      setTransactions(transactionsData.transactions);
-      setSummary(summaryData.summary);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-    }
-  };
-
   const onSubmit = async (data: any) => {
-    setLoading(true);
     try {
       if (editingTransaction) {
-        await transactionService.update(editingTransaction._id, {
-          description: data.description,
-          amount: parseFloat(data.amount),
-          type: data.type,
-          categoryId: data.categoryId,
-          date: data.date
+        await updateMutation.mutateAsync({
+          id: editingTransaction._id,
+          data: {
+            description: data.description,
+            amount: parseFloat(data.amount),
+            type: data.type,
+            categoryId: data.categoryId,
+            date: data.date
+          }
         });
       } else {
-        await transactionService.create({
+        await createMutation.mutateAsync({
           description: data.description,
           amount: parseFloat(data.amount),
           type: data.type,
@@ -116,13 +102,9 @@ export default function TransactionsPage() {
           date: data.date
         });
       }
-
-      await loadData();
       closeModal();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao salvar transação');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -151,16 +133,15 @@ export default function TransactionsPage() {
   const handleDelete = async (deleteMode: 'single' | 'all') => {
     if (!deletingTransaction) return;
 
-    setDeleteLoading(true);
     try {
-      await transactionService.delete(deletingTransaction._id, deleteMode);
-      await loadData();
+      await deleteMutation.mutateAsync({
+        id: deletingTransaction._id,
+        deleteMode
+      });
       setIsDeleteModalOpen(false);
       setDeletingTransaction(null);
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao deletar transação');
-    } finally {
-      setDeleteLoading(false);
     }
   };
 
@@ -177,6 +158,9 @@ export default function TransactionsPage() {
     return `${day}/${month}/${year}`;
   };
 
+  const loading = createMutation.isPending || updateMutation.isPending;
+  const deleteLoading = deleteMutation.isPending;
+
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto">
@@ -191,51 +175,97 @@ export default function TransactionsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-green-100">Entradas</span>
-              <TrendingUp size={24} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Income Card */}
+          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="flex items-center justify-between relative z-10">
+              <div>
+                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Entradas</p>
+                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  {formatCurrency(summary.income)}
+                </h3>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)] group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp size={24} />
+              </div>
             </div>
-            <p className="text-3xl font-bold">{formatCurrency(summary.income)}</p>
           </div>
 
-          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-red-100">Saídas</span>
-              <TrendingDown size={24} />
+          {/* Expense Card */}
+          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="flex items-center justify-between relative z-10">
+              <div>
+                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Saídas</p>
+                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  {formatCurrency(summary.expense)}
+                </h3>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)] group-hover:scale-110 transition-transform duration-300">
+                <TrendingDown size={24} />
+              </div>
             </div>
-            <p className="text-3xl font-bold">{formatCurrency(summary.expense)}</p>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-blue-100">Saldo</span>
-              <DollarSign size={24} />
+          {/* Balance Card */}
+          <div className={`
+            bg-gradient-to-br rounded-2xl p-6 shadow-lg relative overflow-hidden text-white group hover:shadow-xl transition-all
+            ${summary.balance < 0
+              ? 'from-[var(--color-danger)] to-[var(--color-danger-dark)] shadow-[var(--color-danger)]/20 hover:shadow-[var(--color-danger)]/30'
+              : 'from-[var(--color-primary)] to-[var(--color-primary-dark)] shadow-[var(--color-primary)]/20 hover:shadow-[var(--color-primary)]/30'
+            }
+          `}>
+            <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+              <DollarSign size={120} />
             </div>
-            <p className="text-3xl font-bold">{formatCurrency(summary.balance)}</p>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="min-w-0">
+                <p className={`text-sm font-medium mb-1 ${summary.balance < 0 ? 'text-red-50/80' : 'text-blue-50/80'}`}>Saldo Total</p>
+                <h3 className="text-3xl font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  {formatCurrency(summary.balance)}
+                </h3>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                <DollarSign size={24} />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Month Filter */}
-        <div className="bg-[var(--color-bg-card)] rounded-xl p-4 shadow-md mb-6">
-          <div className="flex items-center gap-4 overflow-x-auto">
-            {MONTHS.map((month, index) => (
-              <button
-                key={month}
-                onClick={() => setSelectedMonth(index + 1)}
-                className={`
-                  px-6 py-2 rounded-lg font-medium whitespace-nowrap cursor-pointer transition-all
-                  ${selectedMonth === index + 1
-                    ? 'bg-[var(--color-primary)] text-white'
-                    : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]'
-                  }
-                `}
-              >
-                {month}
-              </button>
-            ))}
+        <div className="flex items-center justify-between bg-[var(--color-bg-card)] rounded-xl p-4 shadow-md mb-6">
+          <button
+            onClick={() => {
+              if (selectedMonth === 1) {
+                setSelectedMonth(12);
+                setSelectedYear(selectedYear - 1);
+              } else {
+                setSelectedMonth(selectedMonth - 1);
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-[var(--color-text)] capitalize">
+              {MONTHS[selectedMonth - 1]} {selectedYear}
+            </span>
           </div>
+
+          <button
+            onClick={() => {
+              if (selectedMonth === 12) {
+                setSelectedMonth(1);
+                setSelectedYear(selectedYear + 1);
+              } else {
+                setSelectedMonth(selectedMonth + 1);
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
 
         {/* Transactions List */}

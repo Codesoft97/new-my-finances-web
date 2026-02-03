@@ -7,8 +7,10 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Button from '@/components/ui/Button';
 import { Users } from 'lucide-react';
+import { validatePassword } from '@/utils/passwordValidator';
 
 export default function RegisterFamilyPage() {
   const { user, registerFamily, loading } = useAuth();
@@ -16,7 +18,8 @@ export default function RegisterFamilyPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const passwordValue = watch('password', '');
 
   useEffect(() => {
     if (user && !loading) {
@@ -53,8 +56,8 @@ export default function RegisterFamilyPage() {
       <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Image src="/logo.png" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">DuoFinance</h1>
+            <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
+            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">DuoFinance</h1>
           </div>
           <div className="flex items-center justify-center gap-2 text-[var(--color-text-secondary)]">
             <Users size={20} />
@@ -109,14 +112,16 @@ export default function RegisterFamilyPage() {
             })}
           />
 
-          <Input
+          <PasswordInput
             label="Senha"
-            type="password"
             placeholder="••••••••"
             error={errors.password?.message as string}
             {...register('password', {
               required: 'Senha é obrigatória',
-              minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+              validate: (value: string) => {
+                const result = validatePassword(value);
+                return result.isValid || result.errors[0];
+              }
             })}
           />
 

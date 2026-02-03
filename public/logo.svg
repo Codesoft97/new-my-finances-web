@@ -1,0 +1,16 @@
+<svg width="200" height="200" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left Circle (Primary/Cyan) -->
+  <circle cx="70" cy="65" r="50" stroke="#4FC3F7" stroke-width="20" />
+  
+  <!-- Right Circle (Success/Teal) -->
+  <circle cx="130" cy="65" r="50" stroke="#4DB6AC" stroke-width="20" />
+  
+  <!-- Intersection Masking/Detail (Optional: to simulate interlocking effect) -->
+  <!-- For simple overlay, the above is sufficient. For interlocking, we'd need segments. 
+       Let's stick to the visual shown: overlapping rings. 
+       To make it look nicer, let's put a blending mode or just simple overlap.
+       Based on the reference, they seem to just overlap/link. 
+       Let's create the "linked" effect by redrawing a segment of the left circle on top. -->
+       
+  <path d="M70 15 A 50 50 0 0 1 120 65" stroke="#4FC3F7" stroke-width="20" stroke-linecap="round" />
+</svg>

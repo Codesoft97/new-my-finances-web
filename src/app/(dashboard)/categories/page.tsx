@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import { categoryService } from '@/services/api';
 import { Category } from '@/types';
+import { useCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useCategories';
 
 const COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16',
@@ -17,47 +17,34 @@ const COLORS = [
 ];
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  const [loading, setLoading] = useState(false);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
   const [selectedType, setSelectedType] = useState<'income' | 'expense'>('expense');
 
+  // React Query hooks
+  const { data: categoriesData } = useCategories();
+  const createMutation = useCreateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  const categories = categoriesData?.categories ?? [];
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const data = await categoryService.list();
-      setCategories(data.categories);
-    } catch (error) {
-      console.error('Erro ao carregar categorias:', error);
-    }
-  };
-
   const onSubmit = async (data: any) => {
-    setLoading(true);
     try {
-      await categoryService.create({
+      await createMutation.mutateAsync({
         name: data.name,
         color: selectedColor,
         type: selectedType
       });
-
-      await loadCategories();
       setIsModalOpen(false);
       reset();
       setSelectedColor(COLORS[0]);
       setSelectedType('expense');
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao criar categoria');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -70,8 +57,7 @@ export default function CategoriesPage() {
     if (!categoryToDelete) return;
 
     try {
-      await categoryService.delete(categoryToDelete._id);
-      await loadCategories();
+      await deleteMutation.mutateAsync(categoryToDelete._id);
       setIsDeleteModalOpen(false);
       setCategoryToDelete(null);
     } catch (error: any) {
@@ -82,6 +68,8 @@ export default function CategoriesPage() {
   // Separate categories by type
   const incomeCategories = categories.filter(c => c.type === 'income');
   const expenseCategories = categories.filter(c => c.type === 'expense');
+
+  const loading = createMutation.isPending;
 
   return (
     <div className="p-8">

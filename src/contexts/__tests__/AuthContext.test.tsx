@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { authService } from '@/services/api';
 
@@ -8,7 +9,9 @@ jest.mock('@/services/api', () => ({
   authService: {
     login: jest.fn(),
     register: jest.fn(),
+    logout: jest.fn(),
     getMe: jest.fn(),
+    getFamily: jest.fn(),
   },
 }));
 
@@ -38,6 +41,21 @@ function TestComponent() {
   );
 }
 
+// Wrapper with QueryClientProvider
+function TestWrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>{children}</AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
 describe('AuthContext', () => {
   const mockUser = { id: '1', name: 'Test User', email: 'test@test.com' };
   const mockToken = 'mock-token';
@@ -45,13 +63,15 @@ describe('AuthContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    // Reset environment variable mock
+    process.env.NEXT_PUBLIC_ENABLE_SECURE_AUTH = 'false';
   });
 
   it('renders children correctly', () => {
     render(
-      <AuthProvider>
+      <TestWrapper>
         <div>Child content</div>
-      </AuthProvider>
+      </TestWrapper>
     );
 
     expect(screen.getByText('Child content')).toBeInTheDocument();
@@ -61,9 +81,9 @@ describe('AuthContext', () => {
     (localStorage.getItem as jest.Mock).mockReturnValue(null);
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -71,7 +91,7 @@ describe('AuthContext', () => {
     });
   });
 
-  it('loads user from localStorage on mount', async () => {
+  it('loads user from localStorage on mount when secure auth is disabled', async () => {
     (localStorage.getItem as jest.Mock).mockImplementation((key) => {
       if (key === 'token') return mockToken;
       if (key === 'user') return JSON.stringify(mockUser);
@@ -79,9 +99,9 @@ describe('AuthContext', () => {
     });
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -97,9 +117,9 @@ describe('AuthContext', () => {
     });
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -122,9 +142,9 @@ describe('AuthContext', () => {
     });
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -145,9 +165,9 @@ describe('AuthContext', () => {
     });
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -162,18 +182,19 @@ describe('AuthContext', () => {
     });
   });
 
-  it('handles logout', async () => {
+  it('handles logout and calls logout API', async () => {
     const user = userEvent.setup();
     (localStorage.getItem as jest.Mock).mockImplementation((key) => {
       if (key === 'token') return mockToken;
       if (key === 'user') return JSON.stringify(mockUser);
       return null;
     });
+    (authService.logout as jest.Mock).mockResolvedValueOnce({});
 
     render(
-      <AuthProvider>
+      <TestWrapper>
         <TestComponent />
-      </AuthProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -182,6 +203,7 @@ describe('AuthContext', () => {
 
     await user.click(screen.getByText('Logout'));
 
+    expect(authService.logout).toHaveBeenCalled();
     expect(localStorage.removeItem).toHaveBeenCalledWith('token');
     expect(localStorage.removeItem).toHaveBeenCalledWith('user');
     expect(mockPush).toHaveBeenCalledWith('/login');

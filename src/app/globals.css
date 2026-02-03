@@ -90,6 +90,32 @@
   --color-foreground: var(--color-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Colors */
+  --color-primary: var(--color-primary);
+  --color-primary-light: var(--color-primary-light);
+  --color-primary-dark: var(--color-primary-dark);
+
+  --color-success: var(--color-success);
+  --color-success-light: var(--color-success-light);
+  --color-success-dark: var(--color-success-dark);
+
+  --color-action: var(--color-action);
+  --color-action-light: var(--color-action-light);
+  --color-action-dark: var(--color-action-dark);
+
+  --color-danger: var(--color-danger);
+  --color-danger-light: var(--color-danger-light);
+  --color-danger-dark: var(--color-danger-dark);
+
+  --color-bg-card: var(--color-bg-card);
+  --color-bg-elevated: var(--color-bg-elevated);
+
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
 }
 
 /* ===== Base Styles ===== */

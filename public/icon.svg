@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left Circle (Primary/Cyan) -->
+  <circle cx="70" cy="100" r="50" stroke="#4FC3F7" stroke-width="20" />
+  
+  <!-- Right Circle (Success/Teal) -->
+  <circle cx="130" cy="100" r="50" stroke="#4DB6AC" stroke-width="20" />
+  
+  <!-- Overlap segment for linked effect -->
+  <path d="M70 50 A 50 50 0 0 1 120 100" stroke="#4FC3F7" stroke-width="20" stroke-linecap="round" />
+</svg>
