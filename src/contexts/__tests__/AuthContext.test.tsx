@@ -8,6 +8,7 @@ import { authService } from '@/services/api';
 jest.mock('@/services/api', () => ({
   authService: {
     login: jest.fn(),
+    loginWithGoogle: jest.fn(),
     register: jest.fn(),
     logout: jest.fn(),
     getMe: jest.fn(),

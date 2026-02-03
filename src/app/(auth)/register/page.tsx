@@ -9,13 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import Input from '@/components/ui/Input';
 import PasswordInput from '@/components/ui/PasswordInput';
 import Button from '@/components/ui/Button';
+import GoogleLoginButton from '@/components/ui/GoogleLoginButton';
 import { validatePassword } from '@/utils/passwordValidator';
 
 export default function RegisterPage() {
-  const { user, register: registerUser, loading } = useAuth();
+  const { user, register: registerUser, loginWithGoogle, loading } = useAuth();
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const passwordValue = watch('password', '');
@@ -37,6 +39,23 @@ export default function RegisterPage() {
     }
 
     setIsLoading(false);
+  };
+
+  const handleGoogleSuccess = async (idToken: string) => {
+    setIsGoogleLoading(true);
+    setError('');
+
+    const result = await loginWithGoogle(idToken);
+
+    if (!result.success) {
+      setError(result.message || 'Erro ao fazer login com Google');
+    }
+
+    setIsGoogleLoading(false);
+  };
+
+  const handleGoogleError = (message: string) => {
+    setError(message);
   };
 
   if (loading || user) {
@@ -106,10 +125,23 @@ export default function RegisterPage() {
             })}
           />
 
-          <Button type="submit" fullWidth disabled={isLoading}>
+          <Button type="submit" fullWidth disabled={isLoading || isGoogleLoading}>
             {isLoading ? 'Criando conta...' : 'Criar Conta'}
           </Button>
         </form>
+
+        <div className="my-6 flex items-center gap-4">
+          <div className="flex-1 h-px bg-[var(--color-border)]"></div>
+          <span className="text-sm text-[var(--color-text-secondary)]">ou</span>
+          <div className="flex-1 h-px bg-[var(--color-border)]"></div>
+        </div>
+
+        <div className={isGoogleLoading ? 'opacity-50 pointer-events-none' : ''}>
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-[var(--color-text-secondary)]">
