@@ -4,10 +4,24 @@ export interface User {
   email: string;
 }
 
+export interface FamilyMember {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface Family {
+  id: string;
+  name: string;
+  memberCount: number;
+  members?: FamilyMember[];
+}
+
 export interface Category {
   _id: string;
   name: string;
   color: string;
+  type: 'income' | 'expense';
   userId: string;
   createdAt: string;
   updatedAt: string;
@@ -21,6 +35,7 @@ export interface Transaction {
   categoryId: Category;
   userId: string;
   date: string;
+  isFixed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,8 +48,13 @@ export interface TransactionSummary {
 
 export interface AuthContextType {
   user: User | null;
+  family: Family | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  loginWithGoogle: (idToken: string) => Promise<{ success: boolean; message?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  registerFamily: (familyName: string, name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  addMember: (name: string, email: string, password?: string, sendEmailLink?: boolean) => Promise<{ success: boolean; message?: string; setupUrl?: string }>;
   logout: () => void;
+  refreshFamily: () => Promise<void>;
 }

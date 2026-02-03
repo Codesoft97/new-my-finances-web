@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* ===== LIGHT THEME (Default) ===== */
+:root {
+  /* Primary Colors */
+  --color-primary: #4FC3F7;
+  --color-primary-light: #81D4FA;
+  --color-primary-dark: #29B6F6;
+
+  /* Success/Income (Mint) */
+  --color-success: #4DB6AC;
+  --color-success-light: #80CBC4;
+  --color-success-dark: #26A69A;
+
+  /* Action/CTA (Coral) */
+  --color-action: #FF8A65;
+  --color-action-light: #FFAB91;
+  --color-action-dark: #FF7043;
+
+  /* Danger/Expense */
+  --color-danger: #EF5350;
+  --color-danger-light: #EF9A9A;
+  --color-danger-dark: #E53935;
+
+  /* Backgrounds */
+  --color-bg: #F5F7F9;
+  --color-bg-card: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+
+  /* Text */
+  --color-text: #263238;
+  --color-text-secondary: #607D8B;
+  --color-text-muted: #90A4AE;
+
+  /* Borders */
+  --color-border: #E0E6EB;
+  --color-border-light: #ECEFF1;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(38, 50, 56, 0.05);
+  --shadow-md: 0 4px 6px rgba(38, 50, 56, 0.07);
+  --shadow-lg: 0 10px 25px rgba(38, 50, 56, 0.1);
+}
+
+/* ===== DARK THEME ===== */
+.dark {
+  /* Primary Colors */
+  --color-primary: #4FC3F7;
+  --color-primary-light: #B3E5FC;
+  --color-primary-dark: #03A9F4;
+
+  /* Success/Income */
+  --color-success: #4DB6AC;
+  --color-success-light: #80CBC4;
+  --color-success-dark: #009688;
+
+  /* Action/CTA */
+  --color-action: #FF8A65;
+  --color-action-light: #FFCCBC;
+  --color-action-dark: #FF5722;
+
+  /* Danger */
+  --color-danger: #EF5350;
+  --color-danger-light: #FFCDD2;
+  --color-danger-dark: #D32F2F;
+
+  /* Backgrounds */
+  --color-bg: #0F1419;
+  --color-bg-card: #1A2027;
+  --color-bg-elevated: #242D35;
+
+  /* Text */
+  --color-text: #ECEFF1;
+  --color-text-secondary: #B0BEC5;
+  --color-text-muted: #78909C;
+
+  /* Borders */
+  --color-border: #37474F;
+  --color-border-light: #455A64;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Tailwind Theme Integration ===== */
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Colors */
+  --color-primary: var(--color-primary);
+  --color-primary-light: var(--color-primary-light);
+  --color-primary-dark: var(--color-primary-dark);
+
+  --color-success: var(--color-success);
+  --color-success-light: var(--color-success-light);
+  --color-success-dark: var(--color-success-dark);
+
+  --color-action: var(--color-action);
+  --color-action-light: var(--color-action-light);
+  --color-action-dark: var(--color-action-dark);
+
+  --color-danger: var(--color-danger);
+  --color-danger-light: var(--color-danger-light);
+  --color-danger-dark: var(--color-danger-dark);
+
+  --color-bg-card: var(--color-bg-card);
+  --color-bg-elevated: var(--color-bg-elevated);
+
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+}
+
+/* ===== Base Styles ===== */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth theme transitions */
+*,
+*::before,
+*::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
