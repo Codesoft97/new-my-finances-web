@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, ChevronLeft, ChevronRight, PieChart, Target } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import Modal from '@/components/ui/Modal';
+import MonthSelector from '@/components/ui/MonthSelector';
 import { Transaction } from '@/types';
 import {
   useTransactions,
@@ -16,6 +17,7 @@ import {
   useDeleteTransaction
 } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
+import { useGoals } from '@/hooks/useGoals';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -36,6 +38,8 @@ export default function TransactionsPage() {
   const { data: transactionsData } = useTransactions(selectedMonth, selectedYear);
   const { data: summaryData } = useTransactionSummary(selectedMonth, selectedYear);
   const { data: categoriesData } = useCategories();
+  const { data: goalsData } = useGoals();
+  const goals = goalsData?.goals ?? [];
 
   const createMutation = useCreateTransaction();
   const updateMutation = useUpdateTransaction();
@@ -51,12 +55,23 @@ export default function TransactionsPage() {
     return today.toISOString().split('T')[0];
   };
 
-  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors } } = useForm({
+  interface TransactionFormData {
+    description: string;
+    amount: string;
+    type: 'income' | 'expense' | 'investment';
+    categoryId: string;
+    goalId: string;
+    isFixed: boolean;
+    date: string;
+  }
+
+  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors } } = useForm<TransactionFormData>({
     defaultValues: {
       description: '',
       amount: '',
-      type: 'expense' as 'income' | 'expense',
+      type: 'expense',
       categoryId: '',
+      goalId: '',
       isFixed: false,
       date: getTodayDate()
     }
@@ -65,7 +80,9 @@ export default function TransactionsPage() {
   const transactionType = watch('type');
 
   // Filter categories based on transaction type
-  const filteredCategories = categories.filter(c => c.type === transactionType);
+  const filteredCategories = transactionType === 'investment'
+    ? []
+    : categories.filter(c => c.type === transactionType);
 
   // Clear category selection when transaction type changes (except when editing or initial mount)
   const isFirstRender = useRef(true);
@@ -76,6 +93,7 @@ export default function TransactionsPage() {
     }
     if (!editingTransaction) {
       setValue('categoryId', '');
+      setValue('goalId', '');
     }
   }, [transactionType, setValue, editingTransaction]);
 
@@ -89,6 +107,7 @@ export default function TransactionsPage() {
             amount: parseFloat(data.amount),
             type: data.type,
             categoryId: data.categoryId,
+            goalId: (data.type === 'investment' && data.goalId) ? data.goalId : undefined,
             date: data.date
           }
         });
@@ -97,7 +116,8 @@ export default function TransactionsPage() {
           description: data.description,
           amount: parseFloat(data.amount),
           type: data.type,
-          categoryId: data.categoryId,
+          categoryId: data.type === 'investment' ? undefined : data.categoryId,
+          goalId: (data.type === 'investment' && data.goalId) ? data.goalId : undefined,
           isFixed: data.isFixed,
           date: data.date
         });
@@ -114,6 +134,7 @@ export default function TransactionsPage() {
     setValue('amount', transaction.amount.toString());
     setValue('type', transaction.type);
     setValue('categoryId', transaction.categoryId?._id || '');
+    setValue('goalId', transaction.goalId?._id || '');
     setValue('isFixed', transaction.isFixed);
     setValue('date', transaction.date.split('T')[0]);
     setIsModalOpen(true);
@@ -232,41 +253,14 @@ export default function TransactionsPage() {
         </div>
 
         {/* Month Filter */}
-        <div className="flex items-center justify-between bg-[var(--color-bg-card)] rounded-xl p-4 shadow-md mb-6">
-          <button
-            onClick={() => {
-              if (selectedMonth === 1) {
-                setSelectedMonth(12);
-                setSelectedYear(selectedYear - 1);
-              } else {
-                setSelectedMonth(selectedMonth - 1);
-              }
-            }}
-            className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
-          >
-            <ChevronLeft size={24} />
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-[var(--color-text)] capitalize">
-              {MONTHS[selectedMonth - 1]} {selectedYear}
-            </span>
-          </div>
-
-          <button
-            onClick={() => {
-              if (selectedMonth === 12) {
-                setSelectedMonth(1);
-                setSelectedYear(selectedYear + 1);
-              } else {
-                setSelectedMonth(selectedMonth + 1);
-              }
-            }}
-            className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </div>
+        <MonthSelector
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={(month, year) => {
+            setSelectedMonth(month);
+            setSelectedYear(year);
+          }}
+        />
 
         {/* Transactions List */}
         <div className="bg-[var(--color-bg-card)] rounded-xl shadow-md overflow-hidden">
@@ -285,12 +279,14 @@ export default function TransactionsPage() {
                     <div className="flex items-center gap-4">
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: transaction.categoryId?.color || '#6B7280' }}
+                        style={{ backgroundColor: transaction.categoryId?.color || transaction.goalId?.color || '#6B7280' }}
                       >
                         {transaction.type === 'income' ? (
                           <TrendingUp className="text-white" size={20} />
-                        ) : (
+                        ) : transaction.type === 'expense' ? (
                           <TrendingDown className="text-white" size={20} />
+                        ) : (
+                          <PieChart className="text-white" size={20} />
                         )}
                       </div>
                       <div>
@@ -303,12 +299,19 @@ export default function TransactionsPage() {
                           )}
                         </div>
                         <p className="text-sm text-[var(--color-text-muted)]">
-                          {transaction.categoryId?.name || 'Sem categoria'} • {formatDate(transaction.date)}
+                          {transaction.type === 'investment'
+                            ? (transaction.goalId?.description || 'Sem objetivo')
+                            : (transaction.categoryId?.name || 'Sem categoria')}
+                          • {formatDate(transaction.date)}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className={`text-xl font-bold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                      <p className={`text-xl font-bold ${transaction.type === 'income'
+                        ? 'text-green-600'
+                        : transaction.type === 'expense'
+                          ? 'text-red-600'
+                          : 'text-[var(--color-primary)]'
                         }`}>
                         {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount)}
                       </p>
@@ -398,7 +401,7 @@ export default function TransactionsPage() {
             <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Tipo
             </label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${transactionType === 'income'
@@ -426,42 +429,101 @@ export default function TransactionsPage() {
                   Despesa
                 </span>
               </label>
+
+              <label className={`
+                flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+                ${transactionType === 'investment'
+                  ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
+                }
+              `}>
+                <input type="radio" value="investment" {...register('type')} className="sr-only" />
+                <PieChart size={20} className={transactionType === 'investment' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
+                <span className={transactionType === 'investment' ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-text-secondary)]'}>
+                  Aporte
+                </span>
+              </label>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-              Categoria
-            </label>
-            <select
-              {...register('categoryId', { required: 'Categoria é obrigatória' })}
-              className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium appearance-none cursor-pointer"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.75rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option value="">Selecione uma categoria</option>
-              {filteredCategories.length === 0 ? (
-                <option value="" disabled>Nenhuma categoria de {transactionType === 'income' ? 'receita' : 'despesa'}</option>
-              ) : (
-                filteredCategories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))
-              )}
-            </select>
-            {errors.categoryId && (
-              <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.categoryId.message as string}</p>
+            {transactionType !== 'investment' && (
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+                  Categoria
+                </label>
+                <select
+                  {...register('categoryId', { required: 'Categoria é obrigatória' })}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {filteredCategories.length === 0 ? (
+                    <option value="" disabled>
+                      {transactionType === 'income'
+                        ? 'Nenhuma categoria de receita'
+                        : transactionType === 'expense'
+                          ? 'Nenhuma categoria de despesa'
+                          : 'Nenhuma categoria de aporte'}
+                    </option>
+                  ) : (
+                    filteredCategories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {errors.categoryId && (
+                  <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.categoryId.message as string}</p>
+                )}
+              </div>
             )}
+
+            {transactionType === 'investment' && (
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+                  Objetivo
+                </label>
+                <select
+                  {...register('goalId', { required: 'Objetivo é obrigatório' })}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                >
+                  <option value="">Selecione um objetivo</option>
+                  {!goals || goals.length === 0 ? (
+                    <option value="" disabled>Nenhum objetivo cadastrado</option>
+                  ) : (
+                    goals.map((goal) => (
+                      <option key={goal.id || goal._id} value={goal.id || goal._id}>
+                        {goal.description}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {errors.goalId && (
+                  <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.goalId.message as string}</p>
+                )}
+              </div>
+            )}
+
+            {/* Previous block replacement end */}
           </div>
 
-          {/* Fixed Transaction Checkbox - Only show when creating */}
-          {!editingTransaction && (
+          {/* Fixed Transaction Checkbox - Only show when creating AND not investment */}
+          {!editingTransaction && transactionType !== 'investment' && (
             <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-elevated)] rounded-lg border border-[var(--color-border)]">
               <input
                 type="checkbox"
@@ -519,7 +581,7 @@ export default function TransactionsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-600">
-            Tem certeza que deseja excluir a transação <strong>"{deletingTransaction?.description}"</strong>?
+            Tem certeza que deseja excluir a transação <strong>&quot;{deletingTransaction?.description}&quot;</strong>?
           </p>
 
           {deletingTransaction?.isFixed ? (

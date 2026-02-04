@@ -19,9 +19,13 @@ interface ExpensesByCategoryProps {
 export default function ExpensesByCategory({ transactions, totalIncome }: ExpensesByCategoryProps) {
   // Filter only expenses and group by category
   const categoryStats: CategoryStats[] = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'expense' && t.categoryId)
     .reduce((acc: CategoryStats[], transaction) => {
-      const existingCategory = acc.find(c => c.categoryId === transaction.categoryId._id);
+      if (!transaction.categoryId) return acc;
+      const category = transaction.categoryId;
+      if (!category) return acc;
+
+      const existingCategory = acc.find(c => c.categoryId === category._id);
 
       if (existingCategory) {
         existingCategory.total += transaction.amount;

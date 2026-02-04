@@ -134,12 +134,12 @@ export const authService = {
 };
 
 export const categoryService = {
-  list: async (type?: 'income' | 'expense') => {
+  list: async (type?: 'income' | 'expense' | 'investment') => {
     const response = await api.get('/categories', { params: type ? { type } : {} });
     return response.data;
   },
 
-  create: async (data: { name: string; color: string; type: 'income' | 'expense' }) => {
+  create: async (data: { name: string; color: string; type: 'income' | 'expense' | 'investment' }) => {
     const response = await api.post('/categories', data);
     return response.data;
   },
@@ -147,6 +147,42 @@ export const categoryService = {
   delete: async (id: string) => {
     const response = await api.delete(`/categories/${id}`);
     return response.data;
+  },
+};
+
+export const goalService = {
+  list: async () => {
+    const response = await api.get('/goals');
+    return response.data;
+  },
+
+  create: async (data: {
+    description: string;
+    totalAmount: number;
+    targetDate: string;
+    initialAmount?: number;
+    color: string;
+  }) => {
+    const response = await api.post('/goals', data);
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: {
+      description?: string;
+      totalAmount?: number;
+      targetDate?: string;
+      initialAmount?: number;
+      color?: string;
+    }
+  ) => {
+    const response = await api.put(`/goals/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    await api.delete(`/goals/${id}`);
   },
 };
 
@@ -159,8 +195,9 @@ export const transactionService = {
   create: async (data: {
     description: string;
     amount: number;
-    type: 'income' | 'expense';
-    categoryId: string;
+    type: 'income' | 'expense' | 'investment';
+    categoryId?: string;
+    goalId?: string;
     date?: string;
     isFixed?: boolean;
   }) => {
@@ -178,8 +215,9 @@ export const transactionService = {
     data: {
       description?: string;
       amount?: number;
-      type?: 'income' | 'expense';
+      type?: 'income' | 'expense' | 'investment';
       categoryId?: string;
+      goalId?: string;
       date?: string;
     }
   ) => {

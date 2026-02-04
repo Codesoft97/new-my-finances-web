@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -67,6 +67,7 @@ export default function CategoriesPage() {
 
   // Separate categories by type
   const incomeCategories = categories.filter(c => c.type === 'income');
+
   const expenseCategories = categories.filter(c => c.type === 'expense');
 
   const loading = createMutation.isPending;

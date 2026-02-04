@@ -38,8 +38,9 @@ export function useTransactionSummary(month: number, year: number) {
 interface CreateTransactionData {
   description: string;
   amount: number;
-  type: 'income' | 'expense';
-  categoryId: string;
+  type: 'income' | 'expense' | 'investment';
+  categoryId?: string;
+  goalId?: string;
   date?: string;
   isFixed?: boolean;
 }
@@ -63,8 +64,9 @@ interface UpdateTransactionData {
   data: {
     description?: string;
     amount?: number;
-    type?: 'income' | 'expense';
+    type?: 'income' | 'expense' | 'investment';
     categoryId?: string;
+    goalId?: string;
     date?: string;
   };
 }

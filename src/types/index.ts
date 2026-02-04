@@ -27,12 +27,28 @@ export interface Category {
   updatedAt: string;
 }
 
+export interface Goal {
+  _id: string; // Mongoose default
+  id?: string;  // API response variant
+  description: string;
+  totalAmount: number;
+  valorAportado: number;
+  valorRestante: number;
+  aporteMensalNecessario: number;
+  targetDate: string;
+  color: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   _id: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
-  categoryId: Category;
+  type: 'income' | 'expense' | 'investment';
+  categoryId?: Category; // Make optional for investment type
+  goalId?: Goal; // Add optional goal reference
   userId: string;
   date: string;
   isFixed: boolean;

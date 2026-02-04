@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Users,
   UserPlus,
+  Target,
   Sun,
   Moon
 } from 'lucide-react';
@@ -36,6 +37,7 @@ export default function Sidebar() {
     { icon: Home, label: 'Dashboard', href: '/' },
     { icon: TrendingUp, label: 'Transações', href: '/transactions' },
     { icon: FolderOpen, label: 'Categorias', href: '/categories' },
+    { icon: Target, label: 'Objetivos', href: '/goals' },
   ];
 
   const isActive = (href: string) => pathname === href;

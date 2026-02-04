@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
@@ -6,16 +7,17 @@ import { useTransactions, useTransactionSummary } from '@/hooks/useTransactions'
 import ExpensesByCategory from '@/components/dashboard/ExpensesByCategory';
 import FixedVsVariableExpenses from '@/components/dashboard/FixedVsVariableExpenses';
 import TopExpenses from '@/components/dashboard/TopExpenses';
+import MonthSelector from '@/components/ui/MonthSelector';
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
   const currentDate = new Date();
-  const month = currentDate.getMonth() + 1;
-  const year = currentDate.getFullYear();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
-  const { data: transactionsData, isLoading: transactionsLoading } = useTransactions(month, year);
-  const { data: summaryData, isLoading: summaryLoading } = useTransactionSummary(month, year);
+  const { data: transactionsData, isLoading: transactionsLoading } = useTransactions(selectedMonth, selectedYear);
+  const { data: summaryData, isLoading: summaryLoading } = useTransactionSummary(selectedMonth, selectedYear);
 
   const transactions = transactionsData?.transactions ?? [];
   const summary = summaryData?.summary ?? { income: 0, expense: 0, balance: 0 };
@@ -38,8 +40,8 @@ export default function DashboardPage() {
           <h1 className="text-4xl font-bold text-[var(--color-text)] mb-2">
             Olá, {user?.name}!
           </h1>
-          <p className="text-[var(--color-text-secondary)]">
-            Confira seu resumo financeiro de {currentMonth}
+          <p className="text-[var(--color-text-secondary)] mb-6">
+            Confira seu resumo financeiro
           </p>
         </div>
 
@@ -99,6 +101,15 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <MonthSelector
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={(month, year) => {
+            setSelectedMonth(month);
+            setSelectedYear(year);
+          }}
+        />
 
         {/* Analytics Section */}
         {loading ? (
