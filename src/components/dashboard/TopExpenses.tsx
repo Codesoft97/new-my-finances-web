@@ -21,15 +21,17 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
   const categoryExpenses: CategoryExpense[] = transactions
     .filter(t => t.type === 'expense')
     .reduce((acc: CategoryExpense[], transaction) => {
-      const existingCategory = acc.find(c => c.categoryId === transaction.categoryId._id);
+      if (!transaction.categoryId) return acc;
+
+      const existingCategory = acc.find(c => c.categoryId === transaction.categoryId!._id);
 
       if (existingCategory) {
         existingCategory.total += transaction.amount;
       } else {
         acc.push({
-          categoryId: transaction.categoryId._id,
-          categoryName: transaction.categoryId.name,
-          categoryColor: transaction.categoryId.color,
+          categoryId: transaction.categoryId!._id,
+          categoryName: transaction.categoryId!.name,
+          categoryColor: transaction.categoryId!.color,
           total: transaction.amount,
           percentageOfIncome: 0
         });
