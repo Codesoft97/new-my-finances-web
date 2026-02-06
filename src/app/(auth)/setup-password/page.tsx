@@ -52,7 +52,7 @@ function SetupPasswordForm() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-        <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+        <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md text-center">
           <CheckCircle className="text-[var(--color-success)] mx-auto mb-4" size={64} />
           <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Senha Configurada!</h2>
           <p className="text-[var(--color-text-secondary)] mb-4">Sua senha foi configurada com sucesso.</p>
@@ -64,7 +64,7 @@ function SetupPasswordForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Image src="/logo.png" alt="DuoFinance" width={40} height={40} className="rounded-lg" />

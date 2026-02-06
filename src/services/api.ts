@@ -193,13 +193,34 @@ export const goalService = {
     return response.data;
   },
 
-  delete: async (id: string) => {
-    await api.delete(`/goals/${id}`);
+  delete: async (id: string, cascade: boolean = false) => {
+    await api.delete(`/goals/${id}`, { params: { cascade } });
   },
 };
 
+export const bankAccountService = {
+  list: async () => {
+    const response = await api.get('/bank-accounts');
+    return response.data;
+  },
+  create: async (data: { name: string; type: string; color: string; initialBalance: number }) => {
+    const response = await api.post('/bank-accounts', data);
+    return response.data;
+  },
+  update: async (id: string, data: { name: string; color: string }) => {
+    const response = await api.put(`/bank-accounts/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/bank-accounts/${id}`);
+    return response.data;
+  },
+};
+
+
+
 export const transactionService = {
-  list: async (params?: { month?: number; year?: number }) => {
+  list: async (params?: { month?: number; year?: number; type?: string; categoryId?: string }) => {
     const response = await api.get('/transactions', { params });
     return response.data;
   },
@@ -210,6 +231,7 @@ export const transactionService = {
     type: 'income' | 'expense' | 'investment';
     categoryId?: string;
     goalId?: string;
+    bankAccountId?: string;
     date?: string;
     isFixed?: boolean;
   }) => {
@@ -230,6 +252,7 @@ export const transactionService = {
       type?: 'income' | 'expense' | 'investment';
       categoryId?: string;
       goalId?: string;
+      bankAccountId?: string;
       date?: string;
     }
   ) => {

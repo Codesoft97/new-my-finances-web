@@ -19,11 +19,11 @@ interface SummaryData {
   summary: TransactionSummary;
 }
 
-// Query: Get transactions for a specific month/year
-export function useTransactions(month: number, year: number) {
+// Query: Get transactions for a specific month/year with optional filters
+export function useTransactions(month: number, year: number, type?: string, categoryId?: string) {
   return useQuery<TransactionsData>({
-    queryKey: transactionKeys.list(month, year),
-    queryFn: () => transactionService.list({ month, year }),
+    queryKey: [...transactionKeys.list(month, year), { type, categoryId }],
+    queryFn: () => transactionService.list({ month, year, type, categoryId }),
   });
 }
 
@@ -41,6 +41,7 @@ interface CreateTransactionData {
   type: 'income' | 'expense' | 'investment';
   categoryId?: string;
   goalId?: string;
+  bankAccountId?: string;
   date?: string;
   isFixed?: boolean;
 }
@@ -55,6 +56,7 @@ export function useCreateTransaction() {
       // Invalidate all transaction lists and summaries
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
     },
   });
 }
@@ -67,6 +69,7 @@ interface UpdateTransactionData {
     type?: 'income' | 'expense' | 'investment';
     categoryId?: string;
     goalId?: string;
+    bankAccountId?: string;
     date?: string;
   };
 }
@@ -80,6 +83,7 @@ export function useUpdateTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
     },
   });
 }
@@ -99,6 +103,7 @@ export function useDeleteTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
     },
   });
 }

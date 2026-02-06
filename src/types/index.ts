@@ -48,6 +48,18 @@ export interface Goal {
   updatedAt: string;
 }
 
+export interface BankAccount {
+  _id: string;
+  name: string;
+  type: 'checking' | 'payment' | 'salary' | 'savings';
+  color: string;
+  balance: number;
+  familyId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   _id: string;
   description: string;
@@ -55,6 +67,7 @@ export interface Transaction {
   type: 'income' | 'expense' | 'investment';
   categoryId?: Category; // Make optional for investment type
   goalId?: Goal; // Add optional goal reference
+  bankAccountId?: BankAccount;
   userId: string;
   date: string;
   isFixed: boolean;

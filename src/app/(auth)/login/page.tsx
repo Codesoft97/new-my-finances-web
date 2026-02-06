@@ -68,7 +68,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Image src="/logo.svg" alt="DuoFinance" width={60} height={60} className="rounded-lg" />

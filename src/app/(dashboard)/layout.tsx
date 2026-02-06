@@ -35,7 +35,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)]">
+    <div className="min-h-screen bg-[var(--color-bg)] flex">
       <Sidebar />
       <main className="flex-1">
         {children}

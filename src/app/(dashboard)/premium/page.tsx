@@ -102,7 +102,7 @@ export default function PremiumPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {isPremium ? "" : <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
             {(['monthly', 'annual'] as PlanId[]).map((planId) => {
               const plan = PRICING[planId];
               const selected = selectedPlan === planId;
@@ -136,7 +136,7 @@ export default function PremiumPage() {
                 </button>
               );
             })}
-          </div>
+          </div>}
 
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-[var(--color-text)]">
@@ -188,7 +188,11 @@ export default function PremiumPage() {
         </div>
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">O que você libera</h3>
+          {isPremium ? (
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">O que você liberou</h3>
+          ) : (
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">O que você libera</h3>
+          )}
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {FEATURES.map((feature) => (
               <li key={feature} className="flex items-center gap-2 text-[var(--color-text-secondary)]">
