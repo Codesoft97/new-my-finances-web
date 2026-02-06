@@ -133,6 +133,18 @@ export const authService = {
   },
 };
 
+export const billingService = {
+  checkout: async (plan: 'monthly' | 'annual') => {
+    const response = await api.post('/billing/checkout', { plan });
+    return response.data;
+  },
+
+  portal: async () => {
+    const response = await api.post('/billing/portal');
+    return response.data;
+  },
+};
+
 export const categoryService = {
   list: async (type?: 'income' | 'expense' | 'investment') => {
     const response = await api.get('/categories', { params: type ? { type } : {} });

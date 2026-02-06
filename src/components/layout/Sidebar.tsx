@@ -13,6 +13,7 @@ import {
   Users,
   UserPlus,
   Target,
+  Crown,
   Sun,
   Moon
 } from 'lucide-react';
@@ -20,6 +21,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeProvider';
 import AddMemberModal from '@/components/family/AddMemberModal';
+import { isPremiumFamily } from '@/utils/billing';
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -27,17 +29,18 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, family, logout, refreshFamily } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
+  const isPremium = isPremiumFamily(family);
 
   useEffect(() => {
     // Refresh family data on mount to get latest members
     refreshFamily();
-  }, []);
+  }, [refreshFamily]);
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', href: '/' },
     { icon: TrendingUp, label: 'Transações', href: '/transactions' },
     { icon: FolderOpen, label: 'Categorias', href: '/categories' },
-    { icon: Target, label: 'Objetivos', href: '/goals' },
+    ...(isPremium ? [{ icon: Target, label: 'Objetivos', href: '/goals' }] : []),
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -162,6 +165,41 @@ export default function Sidebar() {
               })}
             </ul>
           </nav>
+
+          {/* Premium CTA */}
+          <div className="px-4 pb-4">
+            {isExpanded ? (
+              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4">
+                <div className="flex items-center gap-2 text-[var(--color-text)]">
+                  <Crown size={18} className={isPremium ? 'text-[var(--color-success)]' : 'text-[var(--color-action)]'} />
+                  <span className="font-semibold">Plano Premium</span>
+                </div>
+                <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                  {isPremium
+                    ? 'Objetivos liberados para sua famÃ­lia.'
+                    : 'Desbloqueie Objetivos e recursos exclusivos.'}
+                </p>
+                <Link
+                  href="/premium"
+                  className={`mt-3 inline-flex items-center justify-center w-full px-3 py-2 rounded-lg font-semibold transition-all
+                    ${isPremium
+                      ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20'
+                      : 'bg-[var(--color-action)] text-white hover:bg-[var(--color-action-dark)]'}
+                  `}
+                >
+                  {isPremium ? 'Ver detalhes' : 'Ver planos'}
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href="/premium"
+                className="w-full flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 hover:shadow-sm transition-all"
+                title="Plano Premium"
+              >
+                <Crown size={18} className={isPremium ? 'text-[var(--color-success)]' : 'text-[var(--color-action)]'} />
+              </Link>
+            )}
+          </div>
 
           {/* Theme Toggle & Logout */}
           <div className="p-4 border-t border-[var(--color-border)] space-y-2">

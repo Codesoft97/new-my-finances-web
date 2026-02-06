@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/api';
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const refreshFamily = async () => {
+  const refreshFamily = useCallback(async () => {
     try {
       if (!isSecureAuthEnabled) {
         const token = localStorage.getItem('token');
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Erro ao atualizar família:', error);
     }
-  };
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {

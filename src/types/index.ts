@@ -14,6 +14,12 @@ export interface Family {
   id: string;
   name: string;
   memberCount: number;
+  plan?: 'free' | 'premium';
+  subscriptionStatus?: 'active' | 'none' | 'trialing' | 'past_due' | 'canceled' | 'incomplete' | 'incomplete_expired';
+  planInterval?: 'monthly' | 'annual';
+  currentPeriodEnd?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  trialEndsAt?: string | null;
   members?: FamilyMember[];
 }
 

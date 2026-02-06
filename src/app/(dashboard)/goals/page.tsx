@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Target, Trash2, Pencil } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Target, Trash2, Pencil, Crown } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -9,15 +9,27 @@ import CurrencyInput from '@/components/ui/CurrencyInput';
 import Modal from '@/components/ui/Modal';
 import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoals';
 import { Goal } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPremiumFamily } from '@/utils/billing';
+import { useRouter } from 'next/navigation';
 
 export default function GoalsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const { data: goalsData, isLoading } = useGoals();
+  const { family, loading: authLoading, refreshFamily } = useAuth();
+  const router = useRouter();
+  const isPremium = isPremiumFamily(family);
+  const { data: goalsData, isLoading, error } = useGoals({ enabled: isPremium });
   const goals = goalsData?.goals ?? [];
+  const isForbidden = (error as any)?.response?.status === 403;
+  const showPaywall = !isPremium || isForbidden;
   const createMutation = useCreateGoal();
   const updateMutation = useUpdateGoal();
   const deleteMutation = useDeleteGoal();
+
+  useEffect(() => {
+    refreshFamily();
+  }, [refreshFamily]);
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: {
@@ -120,14 +132,46 @@ export default function GoalsPage() {
               Defina metas e acompanhe suas conquistas
             </p>
           </div>
-          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
-            <Plus size={20} />
-            Novo Objetivo
-          </Button>
+          {showPaywall ? (
+            <Button onClick={() => router.push('/premium')} className="flex items-center gap-2">
+              <Crown size={20} />
+              Assinar Premium
+            </Button>
+          ) : (
+            <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
+              <Plus size={20} />
+              Novo Objetivo
+            </Button>
+          )}
         </div>
 
         {/* Goals List */}
-        {isLoading ? (
+        {authLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
+          </div>
+        ) : showPaywall ? (
+          <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-[var(--color-border)]">
+            <div className="w-16 h-16 bg-[var(--color-action)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Crown size={32} className="text-[var(--color-action)]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+              Objetivos são do Plano Premium
+            </h3>
+            <p className="text-[var(--color-text-muted)] max-w-lg mx-auto mb-6">
+              Crie metas financeiras, acompanhe seu progresso e planeje seus sonhos. Assine o Premium para desbloquear este recurso.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => router.push('/premium')} className="flex items-center gap-2">
+                <Crown size={18} />
+                Ver planos Premium
+              </Button>
+              <Button onClick={() => router.push('/transactions')} variant="outline">
+                Continuar sem objetivos
+              </Button>
+            </div>
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
           </div>

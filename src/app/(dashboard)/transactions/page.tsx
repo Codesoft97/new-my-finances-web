@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, ChevronLeft, ChevronRight, PieChart, Target } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, PieChart, Crown } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -18,6 +18,9 @@ import {
 } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useGoals } from '@/hooks/useGoals';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPremiumFamily } from '@/utils/billing';
+import { useRouter } from 'next/navigation';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -33,13 +36,18 @@ export default function TransactionsPage() {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const { family } = useAuth();
+  const router = useRouter();
+  const canUseGoalsFromFamily = isPremiumFamily(family);
 
   // React Query hooks
   const { data: transactionsData } = useTransactions(selectedMonth, selectedYear);
   const { data: summaryData } = useTransactionSummary(selectedMonth, selectedYear);
   const { data: categoriesData } = useCategories();
-  const { data: goalsData } = useGoals();
-  const goals = goalsData?.goals ?? [];
+  const goalsQuery = useGoals({ enabled: canUseGoalsFromFamily });
+  const goalsErrorStatus = (goalsQuery.error as any)?.response?.status;
+  const canUseGoals = canUseGoalsFromFamily && goalsErrorStatus !== 403;
+  const goals = goalsQuery.data?.goals ?? [];
 
   const createMutation = useCreateTransaction();
   const updateMutation = useUpdateTransaction();
@@ -78,6 +86,9 @@ export default function TransactionsPage() {
   });
 
   const transactionType = watch('type');
+  const isEditingInvestment = editingTransaction?.type === 'investment';
+  const showInvestmentOption = canUseGoals || isEditingInvestment;
+  const blockedByPlan = transactionType === 'investment' && !canUseGoals;
 
   // Filter categories based on transaction type
   const filteredCategories = transactionType === 'investment'
@@ -99,6 +110,10 @@ export default function TransactionsPage() {
 
   const onSubmit = async (data: any) => {
     try {
+      if (data.type === 'investment' && !canUseGoals) {
+        alert('Objetivos estÃ£o disponÃ­veis apenas no Plano Premium');
+        return;
+      }
       if (editingTransaction) {
         await updateMutation.mutateAsync({
           id: editingTransaction._id,
@@ -401,7 +416,7 @@ export default function TransactionsPage() {
             <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Tipo
             </label>
-            <div className="grid grid-cols-3 gap-4">
+            <div className={`grid ${showInvestmentOption ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
               <label className={`
                 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
                 ${transactionType === 'income'
@@ -430,21 +445,40 @@ export default function TransactionsPage() {
                 </span>
               </label>
 
-              <label className={`
-                flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
-                ${transactionType === 'investment'
-                  ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
-                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
-                }
-              `}>
-                <input type="radio" value="investment" {...register('type')} className="sr-only" />
-                <PieChart size={20} className={transactionType === 'investment' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
-                <span className={transactionType === 'investment' ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-text-secondary)]'}>
-                  Aporte
-                </span>
-              </label>
+              {showInvestmentOption && (
+                <label className={`
+                  flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+                  ${transactionType === 'investment'
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
+                    : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
+                  }
+                `}>
+                  <input type="radio" value="investment" {...register('type')} className="sr-only" />
+                  <PieChart size={20} className={transactionType === 'investment' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'} />
+                  <span className={transactionType === 'investment' ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-text-secondary)]'}>
+                    Aporte
+                  </span>
+                </label>
+              )}
             </div>
           </div>
+
+          {!canUseGoals && (
+            <div className="flex items-center justify-between gap-3 p-4 bg-[var(--color-action)]/10 rounded-lg border border-[var(--color-action)]/30">
+              <div className="flex items-center gap-2">
+                <Crown size={18} className="text-[var(--color-action)]" />
+                <div>
+                  <p className="text-sm font-semibold text-[var(--color-text)]">Objetivos sÃ£o Premium</p>
+                  <p className="text-xs text-[var(--color-text-secondary)]">
+                    Desbloqueie aportes vinculados a objetivos.
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => router.push('/premium')}>
+                Ver planos
+              </Button>
+            </div>
+          )}
 
           <div>
             {transactionType !== 'investment' && (
@@ -486,7 +520,7 @@ export default function TransactionsPage() {
               </div>
             )}
 
-            {transactionType === 'investment' && (
+            {transactionType === 'investment' && canUseGoals && (
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
                   Objetivo
@@ -516,6 +550,22 @@ export default function TransactionsPage() {
                 {errors.goalId && (
                   <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.goalId.message as string}</p>
                 )}
+              </div>
+            )}
+
+            {transactionType === 'investment' && !canUseGoals && (
+              <div className="p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+                <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
+                  Objetivos estÃ£o disponÃ­veis apenas no Plano Premium
+                </p>
+                {editingTransaction?.goalId?.description && (
+                  <p className="text-xs text-[var(--color-text-secondary)] mb-3">
+                    Objetivo atual: {editingTransaction.goalId.description}
+                  </p>
+                )}
+                <Button size="sm" onClick={() => router.push('/premium')}>
+                  Ver planos Premium
+                </Button>
               </div>
             )}
 
@@ -563,7 +613,7 @@ export default function TransactionsPage() {
               Cancelar
             </Button>
             <Button type="submit" fullWidth disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {blockedByPlan ? 'Plano Premium necessÃ¡rio' : (loading ? 'Salvando...' : 'Salvar')}
             </Button>
           </div>
         </form>

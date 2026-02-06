@@ -21,10 +21,11 @@ interface GoalsData {
 }
 
 // Query: Get all goals
-export function useGoals() {
+export function useGoals(options?: { enabled?: boolean }) {
   return useQuery<GoalsData>({
     queryKey: goalKeys.lists(),
     queryFn: goalService.list,
+    enabled: options?.enabled ?? true,
   });
 }
 
