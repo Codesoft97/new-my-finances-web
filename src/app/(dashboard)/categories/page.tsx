@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import ColorPicker from '@/components/ui/ColorPicker';
 import { Category } from '@/types';
 import { useCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useCategories';
 
@@ -30,6 +31,18 @@ export default function CategoriesPage() {
 
   const categories = categoriesData?.categories ?? [];
 
+  const isProtectedCategory = (category: Category) => {
+    const name = category.name?.trim().toLowerCase();
+    return name === 'renda' || name === 'outros';
+  };
+
+  const getProtectedCategoryMessage = (category: Category) => {
+    const name = category.name?.trim().toLowerCase();
+    if (name === 'renda') return 'Categoria "Renda" nao pode ser deletada';
+    if (name === 'outros') return 'Categoria "Outros" nao pode ser deletada';
+    return 'Categoria protegida nao pode ser deletada';
+  };
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   const onSubmit = async (data: any) => {
@@ -49,12 +62,22 @@ export default function CategoriesPage() {
   };
 
   const handleDeleteClick = (category: Category) => {
+    if (isProtectedCategory(category)) {
+      alert(getProtectedCategoryMessage(category));
+      return;
+    }
     setCategoryToDelete(category);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
     if (!categoryToDelete) return;
+    if (isProtectedCategory(categoryToDelete)) {
+      alert(getProtectedCategoryMessage(categoryToDelete));
+      setIsDeleteModalOpen(false);
+      setCategoryToDelete(null);
+      return;
+    }
 
     try {
       await deleteMutation.mutateAsync(categoryToDelete._id);
@@ -73,15 +96,15 @@ export default function CategoriesPage() {
   const loading = createMutation.isPending;
 
   return (
-    <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+            <h1 className="text-2xl font-medium text-[var(--color-text)] mb-2">
               Categorias
             </h1>
-            <p className="text-[var(--color-text-secondary)]">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Organize suas transações por categorias
             </p>
           </div>
@@ -93,7 +116,7 @@ export default function CategoriesPage() {
 
         {/* Income Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+          <h2 className="text-base font-medium text-[var(--color-text)] mb-4 flex items-center gap-2">
             <TrendingUp className="text-[var(--color-success)]" size={20} />
             Categorias de Receita
           </h2>
@@ -104,7 +127,7 @@ export default function CategoriesPage() {
               {incomeCategories.map((category) => (
                 <div
                   key={category._id}
-                  className="bg-[var(--color-bg-card)] rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-[var(--color-success)]"
+                  className="bg-[var(--color-bg-card)] rounded-md p-4 border border-[var(--color-border)] border-l-2 border-[var(--color-success)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -115,13 +138,13 @@ export default function CategoriesPage() {
                         <TrendingUp className="text-white" size={20} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[var(--color-text)]">{category.name}</h3>
+                        <h3 className="font-medium text-[var(--color-text)]">{category.name}</h3>
                         <p className="text-sm text-[var(--color-success)]">Receita</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteClick(category)}
-                      className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer"
+                      className={`p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer ${isProtectedCategory(category) ? 'hidden' : ''}`}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -134,7 +157,7 @@ export default function CategoriesPage() {
 
         {/* Expense Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+          <h2 className="text-base font-medium text-[var(--color-text)] mb-4 flex items-center gap-2">
             <TrendingDown className="text-[var(--color-danger)]" size={20} />
             Categorias de Despesa
           </h2>
@@ -145,7 +168,7 @@ export default function CategoriesPage() {
               {expenseCategories.map((category) => (
                 <div
                   key={category._id}
-                  className="bg-[var(--color-bg-card)] rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border-l-4 border-[var(--color-danger)]"
+                  className="bg-[var(--color-bg-card)] rounded-md p-4 border border-[var(--color-border)] border-l-2 border-[var(--color-danger)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -156,13 +179,13 @@ export default function CategoriesPage() {
                         <TrendingDown className="text-white" size={20} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[var(--color-text)]">{category.name}</h3>
+                        <h3 className="font-medium text-[var(--color-text)]">{category.name}</h3>
                         <p className="text-sm text-[var(--color-danger)]">Despesa</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteClick(category)}
-                      className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer"
+                      className={`p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]/20 rounded-lg transition-colors cursor-pointer ${isProtectedCategory(category) ? 'hidden' : ''}`}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -207,7 +230,7 @@ export default function CategoriesPage() {
 
           {/* Type Selector */}
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
               Tipo
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -253,25 +276,12 @@ export default function CategoriesPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-3">
-              Cor
-            </label>
-            <div className="grid grid-cols-10 gap-2">
-              {COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className={`
-                    w-10 h-10 rounded-lg transition-all cursor-pointer
-                    ${selectedColor === color ? 'ring-4 ring-primary-300 scale-110' : ''}
-                  `}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            label="Cor"
+            colors={COLORS}
+            value={selectedColor}
+            onChange={setSelectedColor}
+          />
 
           <div className="flex gap-3">
             <Button
@@ -305,8 +315,11 @@ export default function CategoriesPage() {
         size="sm"
       >
         <div className="text-center">
-          <p className="text-gray-700 mb-6">
+          <p className="text-[var(--color-text-secondary)] mb-2">
             Tem certeza que deseja deletar a categoria <strong>{categoryToDelete?.name}</strong>?
+          </p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-6">
+            As transações vinculadas a esta categoria serão automaticamente transferidas para a categoria <strong>Outros</strong>.
           </p>
           <div className="flex gap-3">
             <Button

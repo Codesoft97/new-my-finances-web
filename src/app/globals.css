@@ -35,6 +35,12 @@
   /* Borders */
   --color-border: #E0E6EB;
   --color-border-light: #ECEFF1;
+  --color-border-hover: #CFD8DC;
+
+  /* Warning */
+  --color-warning: #F59E0B;
+  --color-warning-light: #FDE68A;
+  --color-warning-dark: #D97706;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(38, 50, 56, 0.05);
@@ -77,6 +83,12 @@
   /* Borders */
   --color-border: #37474F;
   --color-border-light: #455A64;
+  --color-border-hover: #546E7A;
+
+  /* Warning */
+  --color-warning: #FBBF24;
+  --color-warning-light: #FDE68A;
+  --color-warning-dark: #D97706;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -116,6 +128,11 @@
 
   --color-border: var(--color-border);
   --color-border-light: var(--color-border-light);
+  --color-border-hover: var(--color-border-hover);
+
+  --color-warning: var(--color-warning);
+  --color-warning-light: var(--color-warning-light);
+  --color-warning-dark: var(--color-warning-dark);
 }
 
 /* ===== Base Styles ===== */

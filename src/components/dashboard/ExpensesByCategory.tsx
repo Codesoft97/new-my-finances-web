@@ -95,16 +95,16 @@ export default function ExpensesByCategory({ transactions, totalIncome }: Expens
 
   if (categoryStats.length === 0) {
     return (
-      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Gastos por Categoria</h3>
+      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4">
+        <h3 className="text-base font-medium text-[var(--color-text)] mb-3">Gastos por Categoria</h3>
         <p className="text-[var(--color-text-muted)] text-center py-8">Nenhuma despesa encontrada</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
-      <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Gastos por Categoria</h3>
+    <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4">
+      <h3 className="text-base font-medium text-[var(--color-text)] mb-3">Gastos por Categoria</h3>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Pie Chart */}
@@ -123,7 +123,7 @@ export default function ExpensesByCategory({ transactions, totalIncome }: Expens
             {/* Center circle for donut effect */}
             <circle cx="100" cy="100" r="40" fill="var(--color-bg-card)" />
             <text x="100" y="95" textAnchor="middle" className="text-xs" fill="var(--color-text-muted)">Total</text>
-            <text x="100" y="112" textAnchor="middle" className="text-sm font-bold" fill="var(--color-text)">
+            <text x="100" y="112" textAnchor="middle" className="text-xs font-medium" fill="var(--color-text)">
               {formatCurrency(totalExpenses).replace('R$', '').trim()}
             </text>
           </svg>
@@ -135,13 +135,13 @@ export default function ExpensesByCategory({ transactions, totalIncome }: Expens
             <div key={cat.categoryId} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  className="w-4 h-4 rounded-sm flex-shrink-0"
                   style={{ backgroundColor: cat.categoryColor }}
                 />
-                <span className="text-sm text-[var(--color-text-secondary)]">{cat.categoryName}</span>
+                <span className="text-xs text-[var(--color-text-secondary)]">{cat.categoryName}</span>
               </div>
               <div className="text-right">
-                <span className="text-sm font-semibold text-[var(--color-text)]">{formatCurrency(cat.total)}</span>
+                <span className="text-xs font-medium text-[var(--color-text)]">{formatCurrency(cat.total)}</span>
                 <span className="text-xs text-[var(--color-text-muted)] ml-2">({cat.percentage.toFixed(1)}%)</span>
               </div>
             </div>
