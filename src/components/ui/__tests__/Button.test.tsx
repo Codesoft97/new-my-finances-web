@@ -10,7 +10,7 @@ describe('Button', () => {
   it('applies base button styles', () => {
     render(<Button>Primary</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('rounded-xl');
+    expect(button).toHaveClass('rounded-md');
     expect(button).toHaveClass('font-semibold');
   });
 

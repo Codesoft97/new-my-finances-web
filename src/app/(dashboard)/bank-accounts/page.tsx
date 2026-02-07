@@ -20,7 +20,7 @@ export default function BankAccountsPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">Contas Bancárias</h1>
+            <h1 className="text-2xl font-medium text-[var(--color-text)]">Contas Bancárias</h1>
             <p className="text-[var(--color-text-secondary)]">Gerencie suas contas e saldos</p>
           </div>
           <Button
@@ -37,12 +37,12 @@ export default function BankAccountsPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2].map((i) => (
-              <div key={i} className="h-40 rounded-2xl bg-[var(--color-bg-elevated)] animate-pulse" />
+              <div key={i} className="h-40 rounded-md bg-[var(--color-bg-elevated)] animate-pulse" />
             ))}
           </div>
         ) : bankAccounts?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-bg-card)] text-center">
-            <div className="w-16 h-16 rounded-full bg-[var(--color-bg-elevated)] flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-10 px-4 border border-dashed border-[var(--color-border)] rounded-md bg-[var(--color-bg-card)] text-center">
+            <div className="w-14 h-14 rounded-md bg-[var(--color-bg-elevated)] flex items-center justify-center mb-4">
               <Landmark size={32} className="text-[var(--color-text-muted)]" />
             </div>
             <h3 className="text-lg font-medium text-[var(--color-text)] mb-2">Nenhuma conta cadastrada</h3>

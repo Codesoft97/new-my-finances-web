@@ -32,26 +32,24 @@ export default function MonthSelector({ selectedMonth, selectedYear, onMonthChan
   };
 
   return (
-    <div className={`flex items-center justify-between bg-[var(--color-bg-card)] rounded-xl p-4 shadow-md ${className}`}>
+      <div className="flex items-center justify-between md:justify-end gap-3">
       <button
         onClick={handlePreviousMonth}
-        className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+        className="p-2 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
       >
-        <ChevronLeft size={24} />
+        <ChevronLeft size={18} />
       </button>
 
-      <div className="flex items-center gap-2">
-        <span className="text-lg font-bold text-[var(--color-text)] capitalize">
-          {MONTHS[selectedMonth - 1]} {selectedYear}
-        </span>
-      </div>
+      <span className="text-sm font-medium text-[var(--color-text)] capitalize">
+        {MONTHS[selectedMonth - 1]} {selectedYear}
+      </span>
 
       <button
         onClick={handleNextMonth}
-        className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+        className="p-2 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
       >
-        <ChevronRight size={24} />
+        <ChevronRight size={18} />
       </button>
-    </div>
+      </div>
   );
 }

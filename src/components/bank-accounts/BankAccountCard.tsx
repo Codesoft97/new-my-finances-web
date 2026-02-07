@@ -26,39 +26,51 @@ const TYPE_LABELS = {
 
 export default function BankAccountCard({ account }: BankAccountCardProps) {
   const Icon = TYPE_ICONS[account.type] || Landmark;
+  const isPrimary = account.isPrimary;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { deleteBankAccount } = useBankAccounts();
 
   const handleDelete = async () => {
+    if (isPrimary) {
+      alert('A primeira conta cadastrada nao pode ser deletada.');
+      return;
+    }
     try {
       await deleteBankAccount.mutateAsync(account._id);
       setIsDeleteModalOpen(false);
-    } catch (error) {
-      alert('Erro ao excluir conta.');
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Erro ao excluir conta.');
     }
   };
 
   return (
     <>
-      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-visible group">
+      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4 transition-colors relative overflow-visible group">
         <div
-          className="absolute top-0 left-0 w-2 h-full rounded-l-2xl"
+          className="absolute top-0 left-0 w-2 h-full rounded-l-md"
           style={{ backgroundColor: account.color }}
         />
 
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg"
+              className="w-10 h-10 rounded-md flex items-center justify-center text-white"
               style={{ backgroundColor: account.color }}
             >
-              <Icon size={24} />
+              <Icon size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[var(--color-text)]">{account.name}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)]">{TYPE_LABELS[account.type]}</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-medium text-[var(--color-text)]">{account.name}</h3>
+                {isPrimary && (
+                  <span className="text-xs text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-sm px-2 py-0.5">
+                    Principal
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[var(--color-text-secondary)]">{TYPE_LABELS[account.type]}</p>
             </div>
           </div>
 
@@ -66,13 +78,13 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               onBlur={() => setTimeout(() => setIsMenuOpen(false), 200)}
-              className="p-2 -mr-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-full transition-colors"
+              className="p-2 -mr-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-md transition-colors"
             >
               <MoreVertical size={20} />
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-36 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-xl shadow-lg z-10 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-36 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-md shadow-sm z-10 overflow-hidden">
                 <button
                   onClick={() => {
                     setIsEditModalOpen(true);
@@ -83,24 +95,26 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
                   <Pencil size={16} />
                   Editar
                 </button>
-                <button
-                  onClick={() => {
-                    setIsDeleteModalOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger)]/10 transition-colors text-left"
-                >
-                  <Trash2 size={16} />
-                  Excluir
-                </button>
+                {!isPrimary && (
+                  <button
+                    onClick={() => {
+                      setIsDeleteModalOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger)]/10 transition-colors text-left"
+                  >
+                    <Trash2 size={16} />
+                    Excluir
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
 
         <div className="mt-6">
-          <p className="text-sm text-[var(--color-text-muted)] mb-1">Saldo atual</p>
-          <p className="text-2xl font-bold text-[var(--color-text)]">
+          <p className="text-xs text-[var(--color-text-muted)] mb-1">Saldo atual</p>
+          <p className="text-lg font-medium text-[var(--color-text)]">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(account.balance)}
           </p>
         </div>
@@ -123,8 +137,8 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
           <p className="text-[var(--color-text-secondary)]">
             Tem certeza que deseja excluir a conta <strong>{account.name}</strong>?
             <br />
-            <span className="text-sm text-[var(--color-warning)] block mt-2">
-              Todas as transações vinculadas a esta conta serão excluidas junto.
+            <span className="text-sm text-[var(--color-text-muted)] block mt-2">
+              A exclusao so e permitida se nao houver transacoes vinculadas a esta conta.
             </span>
           </p>
 

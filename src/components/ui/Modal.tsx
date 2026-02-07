@@ -36,28 +36,28 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className={`
-        relative rounded-2xl shadow-2xl w-full ${sizes[size]} m-4 max-h-[90vh] overflow-hidden
+        relative rounded-md shadow-md w-full ${sizes[size]} m-4 max-h-[90vh] overflow-hidden
         bg-[var(--color-bg-card)] border border-[var(--color-border)]
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
-          <h2 className="text-2xl font-bold text-[var(--color-text)]">{title}</h2>
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+          <h2 className="text-lg font-medium text-[var(--color-text)]">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-[var(--color-bg-elevated)] cursor-pointer transition-colors"
+            className="p-2 rounded-md hover:bg-[var(--color-bg-elevated)] cursor-pointer transition-colors"
           >
             <X size={20} className="text-[var(--color-text-secondary)]" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="p-4 overflow-y-auto max-h-[calc(90vh-72px)]">
           {children}
         </div>
       </div>

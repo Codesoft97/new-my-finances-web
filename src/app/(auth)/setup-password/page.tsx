@@ -52,9 +52,9 @@ function SetupPasswordForm() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-        <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md text-center">
+        <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4 md:p-6 w-full max-w-md text-center">
           <CheckCircle className="text-[var(--color-success)] mx-auto mb-4" size={64} />
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Senha Configurada!</h2>
+          <h2 className="text-lg font-medium text-[var(--color-text)] mb-2">Senha Configurada!</h2>
           <p className="text-[var(--color-text-secondary)] mb-4">Sua senha foi configurada com sucesso.</p>
           <p className="text-sm text-[var(--color-text-muted)]">Redirecionando para o login...</p>
         </div>
@@ -64,11 +64,11 @@ function SetupPasswordForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md">
+      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4 md:p-6 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Image src="/logo.png" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">DuoFinance</h1>
+            <h1 className="text-xl font-semibold text-[var(--color-text)]">DuoFinance</h1>
           </div>
           <p className="text-[var(--color-text-secondary)]">Configure sua senha para acessar a conta</p>
         </div>

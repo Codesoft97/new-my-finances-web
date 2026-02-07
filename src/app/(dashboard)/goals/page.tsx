@@ -128,7 +128,7 @@ export default function GoalsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+            <h1 className="text-2xl font-medium text-[var(--color-text)] mb-1">
               Objetivos
             </h1>
             <p className="text-[var(--color-text-secondary)]">
@@ -154,11 +154,11 @@ export default function GoalsPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
           </div>
         ) : showPaywall ? (
-          <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-[var(--color-border)]">
-            <div className="w-16 h-16 bg-[var(--color-action)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-10 bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)]">
+            <div className="w-16 h-16 bg-[var(--color-action)]/10 rounded-md flex items-center justify-center mx-auto mb-4">
               <Crown size={32} className="text-[var(--color-action)]" />
             </div>
-            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-lg font-medium text-[var(--color-text)] mb-1">
               Objetivos são do Plano Premium
             </h3>
             <p className="text-[var(--color-text-muted)] max-w-lg mx-auto mb-6">
@@ -179,11 +179,11 @@ export default function GoalsPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
           </div>
         ) : !goals || goals.length === 0 ? (
-          <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl shadow-sm border border-[var(--color-border)]">
-            <div className="w-16 h-16 bg-[var(--color-bg-elevated)] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-10 bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)]">
+            <div className="w-16 h-16 bg-[var(--color-bg-elevated)] rounded-md flex items-center justify-center mx-auto mb-4">
               <Target size={32} className="text-[var(--color-text-muted)]" />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-base font-medium text-[var(--color-text)] mb-2">
               Nenhum objetivo encontrado
             </h3>
             <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
@@ -203,25 +203,25 @@ export default function GoalsPage() {
               return (
                 <div
                   key={goalId}
-                  className="bg-[var(--color-bg-card)] rounded-xl p-6 shadow-md hover:shadow-lg transition-all border-l-4"
+                  className="bg-[var(--color-bg-card)] rounded-md p-4 border border-[var(--color-border)] border-l-2"
                   style={{ borderLeftColor: goal.color }}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-bold text-lg text-[var(--color-text)] mb-1">{goal.description}</h3>
+                      <h3 className="text-base font-medium text-[var(--color-text)] mb-1">{goal.description}</h3>
                       <p className="text-sm text-[var(--color-text-muted)]">Meta: {formatDate(goal.targetDate)}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleEdit(goal)}
-                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] cursor-pointer transition-colors rounded-full hover:bg-[var(--color-bg-elevated)]"
+                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] cursor-pointer transition-colors rounded-md hover:bg-[var(--color-bg-elevated)]"
                         title="Editar"
                       >
                         <Pencil size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(goalId)}
-                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] cursor-pointer transition-colors rounded-full hover:bg-[var(--color-bg-elevated)]"
+                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] cursor-pointer transition-colors rounded-md hover:bg-[var(--color-bg-elevated)]"
                         title="Excluir"
                       >
                         <Trash2 size={18} />
@@ -238,11 +238,11 @@ export default function GoalsPage() {
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-[var(--color-text-secondary)]">Progresso</span>
-                      <span className="font-semibold text-[var(--color-text)]">{progress.toFixed(1)}%</span>
+                      <span className="font-medium text-[var(--color-text)]">{progress.toFixed(1)}%</span>
                     </div>
-                    <div className="w-full bg-[var(--color-bg-elevated)] rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-[var(--color-bg-elevated)] rounded-sm h-2.5 overflow-hidden">
                       <div
-                        className="h-2.5 rounded-full transition-all duration-500"
+                        className="h-2.5 rounded-sm transition-all duration-500"
                         style={{ width: `${progress}%`, backgroundColor: goal.color }}
                       ></div>
                     </div>
@@ -251,11 +251,11 @@ export default function GoalsPage() {
                   <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-[var(--color-border)]">
                     <div>
                       <p className="text-xs text-[var(--color-text-muted)]">Acumulado</p>
-                      <p className="font-semibold text-[var(--color-success)]">{formatCurrency(goal.valorAportado)}</p>
+                      <p className="font-medium text-[var(--color-success)]">{formatCurrency(goal.valorAportado)}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-[var(--color-text-muted)]">Meta Total</p>
-                      <p className="font-semibold text-[var(--color-text)]">{formatCurrency(goal.totalAmount)}</p>
+                      <p className="font-medium text-[var(--color-text)]">{formatCurrency(goal.totalAmount)}</p>
                     </div>
                   </div>
 
@@ -328,7 +328,7 @@ export default function GoalsPage() {
             <input
               type="date"
               {...register('targetDate', { required: 'Data alvo é obrigatória' })}
-              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
+              className="w-full px-3 py-2 rounded-md border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
             />
             {errors.targetDate && (
               <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.targetDate.message as string}</p>

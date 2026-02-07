@@ -40,8 +40,8 @@ export default function ColorPicker({
               aria-checked={isSelected}
               aria-label={`Cor ${color}`}
               onClick={() => onChange(color)}
-              className={`${sizeClasses} rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-110 ${isSelected
-                ? 'ring-2 ring-offset-2 ring-[var(--color-primary)] ring-offset-[var(--color-bg-card)] scale-110'
+              className={`${sizeClasses} rounded-sm flex items-center justify-center cursor-pointer transition-transform hover:scale-105 ${isSelected
+                ? 'ring-2 ring-offset-2 ring-[var(--color-primary)] ring-offset-[var(--color-bg-card)] scale-105'
                 : 'ring-1 ring-transparent'
                 }`}
               style={{ backgroundColor: color }}

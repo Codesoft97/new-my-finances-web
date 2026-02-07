@@ -16,16 +16,16 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const sizes = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-3 text-base',
-    lg: 'px-6 py-4 text-lg'
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-3.5 py-2 text-sm',
+    lg: 'px-4 py-2.5 text-base'
   };
 
   const baseStyles = `
     ${sizes[size]}
-    rounded-xl font-semibold transition-all duration-200 
+    rounded-md font-medium transition-colors duration-150 
     disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
-    focus:outline-none focus:ring-4
+    focus:outline-none focus:ring-2
   `;
 
   const variants = {
@@ -33,12 +33,11 @@ export default function Button({
       bg-[var(--color-action)] text-white 
       hover:bg-[var(--color-action-dark)] 
       focus:ring-[var(--color-action-light)]
-      shadow-md hover:shadow-lg
     `,
     secondary: `
       bg-[var(--color-bg-elevated)] text-[var(--color-text)] 
-      border-2 border-[var(--color-border)]
-      hover:bg-[var(--color-border-light)] hover:border-[var(--color-text-muted)]
+      border border-[var(--color-border)]
+      hover:bg-[var(--color-border-light)] hover:border-[var(--color-border-hover)]
       focus:ring-[var(--color-border)]
     `,
     danger: `
@@ -47,7 +46,7 @@ export default function Button({
       focus:ring-[var(--color-danger-light)]
     `,
     outline: `
-      border-2 border-[var(--color-primary)] text-[var(--color-primary)] 
+      border border-[var(--color-primary)] text-[var(--color-primary)] 
       hover:bg-[var(--color-primary)] hover:text-white
       focus:ring-[var(--color-primary-light)]
     `,

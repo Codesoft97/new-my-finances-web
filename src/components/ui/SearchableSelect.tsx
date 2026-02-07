@@ -65,22 +65,22 @@ export default function SearchableSelect({
 
       <div
         className={`
-          relative w-full rounded-xl border-2 bg-[var(--color-bg-card)] transition-all cursor-pointer
+          relative w-full rounded-md border bg-[var(--color-bg-card)] transition-colors cursor-pointer
           ${error
             ? 'border-[var(--color-danger)] focus-within:ring-[var(--color-danger)]/20'
             : 'border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-[var(--color-primary)]/20'
           }
           ${disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-[var(--color-border-hover)]'}
-          focus-within:ring-4 focus-within:outline-none
+          focus-within:ring-2 focus-within:outline-none
         `}
         onClick={() => !disabled && setIsOpen(true)}
       >
-        <div className="flex items-center px-4 py-3 min-h-[50px]">
+        <div className="flex items-center px-3 py-2 min-h-[44px]">
           {selectedOption && !isOpen ? (
             <div className="flex items-center gap-2 flex-1">
               {selectedOption.color && (
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="w-3 h-3 rounded-sm"
                   style={{ backgroundColor: selectedOption.color }}
                 />
               )}
@@ -112,7 +112,7 @@ export default function SearchableSelect({
                   e.stopPropagation();
                   onChange('');
                 }}
-                className="p-1 hover:bg-[var(--color-bg-elevated)] rounded-full text-[var(--color-text-muted)]"
+                className="p-1 hover:bg-[var(--color-bg-elevated)] rounded-md text-[var(--color-text-muted)]"
               >
                 <X size={16} />
               </button>
@@ -128,7 +128,7 @@ export default function SearchableSelect({
 
       {/* Dropdown */}
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-2 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-xl max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-2 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md shadow-sm max-h-60 overflow-y-auto">
           {filteredOptions.length === 0 ? (
             <div className="p-4 text-center text-[var(--color-text-muted)]">
               Nenhuma opção encontrada
@@ -140,7 +140,7 @@ export default function SearchableSelect({
                   key={option.id}
                   onClick={() => handleSelect(option.id)}
                   className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors
+                    flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors
                     ${value === option.id
                       ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                       : 'hover:bg-[var(--color-bg-elevated)] text-[var(--color-text)]'
@@ -149,13 +149,13 @@ export default function SearchableSelect({
                 >
                   {option.color && (
                     <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      className="w-3 h-3 rounded-sm flex-shrink-0"
                       style={{ backgroundColor: option.color }}
                     />
                   )}
                   <span className="font-medium truncate">{option.label}</span>
                   {value === option.id && (
-                    <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] ml-auto" />
+                    <div className="w-2 h-2 rounded-sm bg-[var(--color-primary)] ml-auto" />
                   )}
                 </div>
               ))}

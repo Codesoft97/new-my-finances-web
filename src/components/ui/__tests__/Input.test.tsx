@@ -36,7 +36,7 @@ describe('Input', () => {
   it('applies base styles', () => {
     render(<Input />);
     const input = screen.getByRole('textbox');
-    expect(input).toHaveClass('rounded-xl');
+    expect(input).toHaveClass('rounded-md');
     expect(input).toHaveClass('border-2');
   });
 

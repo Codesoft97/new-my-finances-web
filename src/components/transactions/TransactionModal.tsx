@@ -201,7 +201,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
           <input
             type="date"
             {...register('date', { required: 'Data é obrigatória' })}
-            className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
+            className="w-full px-3 py-2 rounded-md border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
           />
           {errors.date && (
             <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.date.message}</p>
@@ -210,12 +210,12 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
 
         {/* Effectivate on creation */}
         {!transactionToEdit && (
-          <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-elevated)] rounded-lg border border-[var(--color-border)]">
+          <div className="flex items-start gap-3 p-3 bg-[var(--color-bg-elevated)] rounded-md border border-[var(--color-border)]">
           <input
             type="checkbox"
             id="isEffective"
             {...register('isEffective')}
-            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer mt-1"
+            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded-sm focus:ring-[var(--color-primary)] cursor-pointer mt-1"
           />
           <label htmlFor="isEffective" className="cursor-pointer">
             <span className="font-medium text-[var(--color-text)]">
@@ -226,7 +226,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
             </p>
             {isFixedTransaction && transactionType !== 'investment' && (
               <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-                Para transações fixas, apenas a primeira parcela será efetivada.
+                Para transações fixas, apenas a primeira transação será efetivada.
               </p>
             )}
           </label>
@@ -239,7 +239,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         </label>
           <div className={`grid ${showInvestmentOption ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
             <label className={`
-              flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+              flex items-center justify-center gap-2 p-3 border rounded-md cursor-pointer transition-colors
               ${transactionType === 'income'
                 ? 'border-[var(--color-success)] bg-[var(--color-success)]/10'
                 : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
@@ -253,7 +253,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
             </label>
 
             <label className={`
-              flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+              flex items-center justify-center gap-2 p-3 border rounded-md cursor-pointer transition-colors
               ${transactionType === 'expense'
                 ? 'border-[var(--color-danger)] bg-[var(--color-danger)]/10'
                 : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
@@ -268,7 +268,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
 
             {showInvestmentOption && (
               <label className={`
-                flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
+                flex items-center justify-center gap-2 p-3 border rounded-md cursor-pointer transition-colors
                 ${transactionType === 'investment'
                   ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
                   : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
@@ -285,7 +285,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         </div>
 
         {!canUseGoals && (
-          <div className="flex items-center justify-between gap-3 p-4 bg-[var(--color-action)]/10 rounded-lg border border-[var(--color-action)]/30">
+          <div className="flex items-center justify-between gap-3 p-3 bg-[var(--color-action)]/10 rounded-md border border-[var(--color-action)]/30">
             <div className="flex items-center gap-2">
               <Crown size={18} className="text-[var(--color-action)]" />
               <div>
@@ -368,7 +368,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
                     )}
                   />
                 ) : (
-                  <div className="p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+                  <div className="p-3 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
                     <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
                       Objetivos estão disponíveis apenas no Plano Premium
                     </p>
@@ -409,7 +409,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
 
         {/* Fixed Transaction Checkbox - Only show when creating AND not investment */}
         {!transactionToEdit && transactionType !== 'investment' && (
-          <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-elevated)] rounded-lg border border-[var(--color-border)]">
+          <div className="flex items-center gap-3 p-3 bg-[var(--color-bg-elevated)] rounded-md border border-[var(--color-border)]">
             <input
               type="checkbox"
               id="isFixed"
@@ -431,7 +431,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
 
         {/* Info for fixed transactions in edit mode */}
         {transactionToEdit && transactionToEdit.isFixed && (
-          <div className="p-4 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/30">
+          <div className="p-3 bg-[var(--color-primary)]/10 rounded-md border border-[var(--color-primary)]/30">
             <p className="text-sm text-[var(--color-text)]">
               <strong>Nota:</strong> Esta é uma {transactionToEdit.type === 'income' ? 'receita' : 'despesa'} fixa. A alteração afetará apenas esta ocorrência.
             </p>

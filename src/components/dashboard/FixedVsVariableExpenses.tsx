@@ -37,16 +37,16 @@ export default function FixedVsVariableExpenses({ transactions, totalIncome }: F
   };
 
   return (
-    <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
-      <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Despesas Fixas vs Variáveis</h3>
+    <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4">
+      <h3 className="text-base font-medium text-[var(--color-text)] mb-3">Despesas Fixas vs Variáveis</h3>
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <div className="flex justify-between text-sm mb-2">
+        <div className="flex justify-between text-xs mb-2">
           <span className="text-[var(--color-primary)] font-medium">Fixas: {fixedPercentage.toFixed(1)}%</span>
           <span className="text-[var(--color-action)] font-medium">Variáveis: {variablePercentage.toFixed(1)}%</span>
         </div>
-        <div className="h-4 bg-[var(--color-border)] rounded-full overflow-hidden flex">
+        <div className="h-3 bg-[var(--color-border)] rounded-sm overflow-hidden flex">
           <div
             className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] transition-all duration-500"
             style={{ width: `${fixedPercentage}%` }}
@@ -59,39 +59,39 @@ export default function FixedVsVariableExpenses({ transactions, totalIncome }: F
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Fixed Expenses Card */}
-        <div className="bg-[var(--color-primary)]/10 rounded-xl p-4 border border-[var(--color-primary)]/20">
+        <div className="bg-[var(--color-primary)]/10 rounded-md p-3 border border-[var(--color-primary)]/20">
           <div className="flex items-center gap-2 mb-2">
             <Repeat size={18} className="text-[var(--color-primary)]" />
-            <span className="text-sm font-medium text-[var(--color-primary)]">Despesas Fixas</span>
+            <span className="text-xs font-medium text-[var(--color-primary)]">Despesas Fixas</span>
           </div>
-          <p className="text-xl font-bold text-[var(--color-primary-dark)]">{formatCurrency(fixedTotal)}</p>
-          <p className="text-sm text-[var(--color-primary)] mt-1">
+          <p className="text-lg font-medium text-[var(--color-primary-dark)]">{formatCurrency(fixedTotal)}</p>
+          <p className="text-xs text-[var(--color-primary)] mt-1">
             {fixedOfIncome.toFixed(1)}% da receita
           </p>
         </div>
 
         {/* Variable Expenses Card */}
-        <div className="bg-[var(--color-action)]/10 rounded-xl p-4 border border-[var(--color-action)]/20">
+        <div className="bg-[var(--color-action)]/10 rounded-md p-3 border border-[var(--color-action)]/20">
           <div className="flex items-center gap-2 mb-2">
             <ShoppingBag size={18} className="text-[var(--color-action)]" />
-            <span className="text-sm font-medium text-[var(--color-action)]">Despesas Variáveis</span>
+            <span className="text-xs font-medium text-[var(--color-action)]">Despesas Variáveis</span>
           </div>
-          <p className="text-xl font-bold text-[var(--color-action-dark)]">{formatCurrency(variableTotal)}</p>
-          <p className="text-sm text-[var(--color-action)] mt-1">
+          <p className="text-lg font-medium text-[var(--color-action-dark)]">{formatCurrency(variableTotal)}</p>
+          <p className="text-xs text-[var(--color-action)] mt-1">
             {variableOfIncome.toFixed(1)}% da receita
           </p>
         </div>
       </div>
 
       {/* Total consumption */}
-      <div className="mt-4 p-4 bg-[var(--color-bg-elevated)] rounded-xl border border-[var(--color-border)]">
+      <div className="mt-4 p-3 bg-[var(--color-bg-elevated)] rounded-md border border-[var(--color-border)]">
         <div className="flex justify-between items-center">
-          <span className="text-[var(--color-text-secondary)]">Total de despesas</span>
+          <span className="text-xs text-[var(--color-text-secondary)]">Total de despesas</span>
           <div className="text-right">
-            <span className="font-bold text-[var(--color-text)]">{formatCurrency(totalExpenses)}</span>
-            <span className={`ml-2 text-sm font-medium ${totalOfIncome > 100 ? 'text-[var(--color-danger)]' : totalOfIncome > 80 ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]'}`}>
+            <span className="font-medium text-[var(--color-text)]">{formatCurrency(totalExpenses)}</span>
+            <span className={`ml-2 text-xs font-medium ${totalOfIncome > 100 ? 'text-[var(--color-danger)]' : totalOfIncome > 80 ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]'}`}>
               ({totalOfIncome.toFixed(1)}% da receita)
             </span>
           </div>

@@ -63,14 +63,14 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="fixed top-4 left-4 z-40 p-2 bg-[var(--color-bg-card)] rounded-lg shadow-md md:hidden border border-[var(--color-border)] text-[var(--color-text)]"
+        className="fixed top-4 left-4 z-40 p-2 bg-[var(--color-bg-card)] rounded-md shadow-sm md:hidden border border-[var(--color-border)] text-[var(--color-text)]"
       >
         <Menu size={24} />
       </button>
 
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -82,22 +82,22 @@ export default function Sidebar() {
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
           ${isExpanded ? 'w-64' : 'w-20'}
         `}
-        style={{ boxShadow: 'var(--shadow-lg)' }}
+        style={{ boxShadow: 'var(--shadow-sm)' }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
             {isExpanded && (
               <div className="flex items-center gap-2">
-                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-xl" />
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
+                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-md" />
+                <h1 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
                   DuoFinance
                 </h1>
               </div>
             )}
             {!isExpanded && (
               <div className="w-full flex justify-center">
-                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-xl" />
+                <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-md" />
               </div>
             )}
 
@@ -116,7 +116,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 ${!isExpanded && 'justify-center'} ${isExpanded ? 'cursor-pointer' : ''}`}
                 onClick={() => isExpanded && setIsFamilyExpanded(!isFamilyExpanded)}
               >
-                <div className="w-10 h-10 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md bg-[var(--color-primary-light)] flex items-center justify-center">
                   <Users className="text-[var(--color-primary-dark)]" size={20} />
                 </div>
                 {isExpanded && (
@@ -141,7 +141,7 @@ export default function Sidebar() {
                 <div className="mt-3 space-y-2">
                   {family.members.map((member) => (
                     <div key={member.id} className="flex items-center gap-2 text-sm">
-                      <div className="w-6 h-6 rounded-full bg-[var(--color-success)] flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-6 h-6 rounded-sm bg-[var(--color-success)] flex items-center justify-center text-white text-xs font-bold">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-[var(--color-text-secondary)] truncate">{member.name}</span>
@@ -158,7 +158,7 @@ export default function Sidebar() {
                         e.stopPropagation();
                         setShowAddMember(true);
                       }}
-                      className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[var(--color-primary)] bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                      className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[var(--color-primary)] bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer"
                     >
                       <UserPlus size={16} />
                       <span>Adicionar membro</span>
@@ -172,7 +172,7 @@ export default function Sidebar() {
           {/* User Info */}
           <div className="p-4 border-b border-[var(--color-border)]">
             <div className={`flex items-center gap-3 ${!isExpanded && 'justify-center'}`}>
-              <div className="w-10 h-10 rounded-full bg-[var(--color-action)] flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-md bg-[var(--color-action)] flex items-center justify-center text-white font-bold">
                 {user?.name.charAt(0).toUpperCase()}
               </div>
               {isExpanded && (
@@ -196,9 +196,9 @@ export default function Sidebar() {
                     <Link
                       href={item.href}
                       className={`
-                        flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium
+                        flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium
                         ${active
-                          ? 'bg-[var(--color-primary)] text-white shadow-md'
+                          ? 'bg-[var(--color-primary)] text-white'
                           : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text)]'
                         }
                         ${!isExpanded && 'justify-center px-2'}
@@ -216,7 +216,7 @@ export default function Sidebar() {
           {/* Premium CTA */}
           <div className="p-4 border-b border-[var(--color-border)]">
             {isExpanded ? (
-              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4">
+              <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => setIsPremiumExpanded(!isPremiumExpanded)}
@@ -241,7 +241,7 @@ export default function Sidebar() {
                     </p>
                     <Link
                       href="/premium"
-                      className={`mt-3 inline-flex items-center justify-center w-full px-3 py-2 rounded-lg font-semibold transition-all
+                      className={`mt-3 inline-flex items-center justify-center w-full px-3 py-2 rounded-md font-semibold transition-colors
                         ${isPremium
                           ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20'
                           : 'bg-[var(--color-action)] text-white hover:bg-[var(--color-action-dark)]'}
@@ -255,7 +255,7 @@ export default function Sidebar() {
             ) : (
               <Link
                 href="/premium"
-                className="w-full flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 hover:shadow-sm transition-all"
+                className="w-full flex items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 transition-colors"
                 title="Plano Premium"
               >
                 <Crown size={18} className={isPremium ? 'text-[var(--color-success)]' : 'text-[var(--color-action)]'} />
@@ -269,8 +269,8 @@ export default function Sidebar() {
             <button
               onClick={toggleTheme}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl w-full
-                text-[var(--color-text-secondary)] cursor-pointer hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text)] transition-all
+                flex items-center gap-3 px-3 py-2 rounded-md w-full
+                text-[var(--color-text-secondary)] cursor-pointer hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text)] transition-colors
                 ${!isExpanded && 'justify-center px-2'}
               `}
             >
@@ -285,8 +285,8 @@ export default function Sidebar() {
             <button
               onClick={logout}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl w-full
-                text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger-light)]/20 transition-all
+                flex items-center gap-3 px-3 py-2 rounded-md w-full
+                text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger-light)]/20 transition-colors
                 ${!isExpanded && 'justify-center px-2'}
               `}
             >
@@ -298,7 +298,7 @@ export default function Sidebar() {
           {/* Toggle Button */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="hidden md:block absolute -right-3 top-14 bg-[var(--color-bg-card)] border-2 border-[var(--color-border)] cursor-pointer rounded-full p-1 hover:bg-[var(--color-bg-elevated)] transition-all"
+            className="hidden md:block absolute -right-3 top-14 bg-[var(--color-bg-card)] border border-[var(--color-border)] cursor-pointer rounded-md p-1.5 hover:bg-[var(--color-bg-elevated)] transition-colors"
           >
             {isExpanded ? (
               <ChevronLeft size={20} className="text-[var(--color-text-secondary)]" />

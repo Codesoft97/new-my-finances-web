@@ -76,7 +76,7 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
       <Modal isOpen={isOpen} onClose={handleClose} title="Membro Adicionado">
         <div className="text-center py-4">
           <CheckCircle className="text-[var(--color-success)] mx-auto mb-4" size={64} />
-          <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Membro adicionado com sucesso!</h3>
+          <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Membro adicionado com sucesso!</h3>
 
           {success.setupUrl ? (
             <div className="mt-4">

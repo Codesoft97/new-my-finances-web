@@ -66,15 +66,15 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({
           onFocus={handleFocus}
           onBlur={handleBlur}
           className={`
-            w-full px-4 py-3 pr-12 rounded-xl border-2
+            w-full px-3 py-2 pr-10 rounded-md border
             bg-[var(--color-bg-card)] text-[var(--color-text)]
             placeholder:text-[var(--color-text-muted)]
             ${error
               ? 'border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger-light)]'
               : 'border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary-light)]'
             }
-            focus:outline-none focus:ring-4
-            transition-all duration-200
+            focus:outline-none focus:ring-2
+            transition-colors duration-150
             ${className}
           `}
           {...props}
@@ -102,7 +102,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({
             {[0, 1, 2, 3, 4].map((level) => (
               <div
                 key={level}
-                className="h-1.5 flex-1 rounded-full transition-all duration-300"
+                className="h-1.5 flex-1 rounded-sm transition-all duration-300"
                 style={{
                   backgroundColor: level <= validation.strength
                     ? strengthColors[validation.strength]
@@ -125,7 +125,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({
             <ul className="text-xs text-[var(--color-danger)] space-y-0.5">
               {validation.errors.slice(0, 3).map((err, i) => (
                 <li key={i} className="flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-current" />
+                  <span className="w-1 h-1 rounded-sm bg-current" />
                   {err}
                 </li>
               ))}

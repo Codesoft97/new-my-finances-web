@@ -85,15 +85,15 @@ export default function PremiumPage() {
   };
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <header className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[var(--color-action)]/10 flex items-center justify-center">
-              <Crown className="text-[var(--color-action)]" size={26} />
+            <div className="w-10 h-10 rounded-md bg-[var(--color-action)]/10 flex items-center justify-center">
+              <Crown className="text-[var(--color-action)]" size={22} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-[var(--color-text)]">Plano Premium</h1>
+              <h1 className="text-xl font-medium text-[var(--color-text)]">Plano Premium</h1>
               <p className="text-[var(--color-text-secondary)]">
                 Assinatura por família com recursos avançados para metas financeiras.
               </p>
@@ -101,9 +101,9 @@ export default function PremiumPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {!isPremium && (
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
               {(['monthly', 'annual'] as PlanId[]).map((planId) => {
                 const plan = PRICING[planId];
                 const selected = selectedPlan === planId;
@@ -113,20 +113,20 @@ export default function PremiumPage() {
                     key={planId}
                     type="button"
                     onClick={() => setSelectedPlan(planId)}
-                    className={`text-left rounded-2xl border-2 p-6 transition-all shadow-sm hover:shadow-md focus:outline-none
+                    className={`text-left rounded-md border p-4 transition-colors cursor-pointer focus:outline-none
                       ${selected ? 'border-[var(--color-action)] bg-[var(--color-action)]/5' : 'border-[var(--color-border)] bg-[var(--color-bg-card)]'}
                     `}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-xl font-semibold text-[var(--color-text)]">{plan.title}</h2>
+                      <h2 className="text-lg font-medium text-[var(--color-text)]">{plan.title}</h2>
                       {plan.highlight && (
-                        <span className="text-xs font-semibold text-[var(--color-action)] bg-[var(--color-action)]/10 px-2 py-1 rounded-full">
+                        <span className="text-xs font-semibold text-[var(--color-action)] bg-[var(--color-action)]/10 px-2 py-1 rounded-sm">
                           {plan.highlight}
                         </span>
                       )}
                     </div>
                     <div className="flex items-end gap-2 mb-3">
-                      <span className="text-3xl font-bold text-[var(--color-text)]">{plan.price}</span>
+                      <span className="text-2xl font-medium text-[var(--color-text)]">{plan.price}</span>
                       <span className="text-sm text-[var(--color-text-secondary)]">{plan.period}</span>
                     </div>
                     <p className="text-sm text-[var(--color-text-secondary)] mb-4">{plan.description}</p>
@@ -140,7 +140,7 @@ export default function PremiumPage() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-sm space-y-4">
+          <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 space-y-3">
             <div className="flex items-center gap-2 text-[var(--color-text)]">
               <CreditCard size={18} />
               <h3 className="font-semibold">Status da assinatura</h3>
@@ -189,7 +189,7 @@ export default function PremiumPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-sm">
+        <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
           {isPremium ? (
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">O que você liberou</h3>
           ) : (

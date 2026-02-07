@@ -95,7 +95,7 @@ export default function CreateBankAccountModal({ isOpen, onClose }: CreateBankAc
           </label>
           <select
             {...register('type', { required: 'Tipo é obrigatório' })}
-            className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] cursor-pointer"
+            className="w-full px-3 py-2 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] cursor-pointer"
           >
             <option value="checking">Conta Corrente</option>
             <option value="payment">Conta de Pagamento</option>

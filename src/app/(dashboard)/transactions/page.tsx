@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Plus, TrendingUp, TrendingDown, Pencil, Trash2, PieChart, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
-import MonthSelector from '@/components/ui/MonthSelector';
+import TransactionsFilters from '@/components/transactions/TransactionsFilters';
 import TransactionModal from '@/components/transactions/TransactionModal';
 import { Transaction } from '@/types';
 import SummaryCards from '@/components/summary/SummaryCards';
@@ -77,6 +77,16 @@ export default function TransactionsPage() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleMonthChange = (month: number, year: number) => {
+    setSelectedMonth(month);
+    setSelectedYear(year);
+  };
+
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
+    setSelectedCategoryId('');
+  };
+
   const toggleTransactionSelection = (id: string) => {
     setSelectedTransactionIds((prev) =>
       prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
@@ -138,14 +148,14 @@ export default function TransactionsPage() {
   const effectivateLoading = effectivateMutation.isPending;
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+        <div className="mb-6">
+          <h1 className="text-xl font-medium text-[var(--color-text)] mb-1">
             Transações
           </h1>
-          <p className="text-[var(--color-text-secondary)]">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             Controle suas receitas e despesas
           </p>
         </div>
@@ -158,70 +168,20 @@ export default function TransactionsPage() {
           investmentsLabel="Guardado"
         />
 
-        {/* Filters Header */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
-          <div className="lg:w-1/3">
-            <MonthSelector
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              onMonthChange={(month, year) => {
-                setSelectedMonth(month);
-                setSelectedYear(year);
-              }}
-              className="h-full"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                setSelectedCategoryId(''); // Reset category when type changes
-              }}
-              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option value="">Todos os tipos</option>
-              <option value="income">Receitas</option>
-              <option value="expense">Despesas</option>
-              <option value="investment">Aportes</option>
-            </select>
-
-            <select
-              value={selectedCategoryId}
-              onChange={(e) => setSelectedCategoryId(e.target.value)}
-              disabled={selectedType === 'investment'}
-              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 1rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option value="">Todas as categorias</option>
-              {categories
-                .filter(c => !selectedType || selectedType === 'investment' || c.type === selectedType)
-                .map(category => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
+        <TransactionsFilters
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={handleMonthChange}
+          selectedType={selectedType}
+          onTypeChange={handleTypeChange}
+          selectedCategoryId={selectedCategoryId}
+          onCategoryChange={setSelectedCategoryId}
+          categories={categories}
+          className="mb-4"
+        />
 
         {pendingTransactionIds.length > 0 && (
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 p-4 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border-light)]">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 p-3 bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)]">
             <label className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -229,7 +189,7 @@ export default function TransactionsPage() {
                 onChange={toggleSelectAllPending}
                 className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer"
               />
-              <span className="text-sm font-semibold text-[var(--color-text)]">
+              <span className="text-sm font-medium text-[var(--color-text)]">
                 Selecionar transações pendentes
               </span>
             </label>
@@ -247,7 +207,7 @@ export default function TransactionsPage() {
         )}
 
         {/* Transactions List */}
-        <div className="bg-[var(--color-bg-card)] rounded-xl shadow-md overflow-hidden">
+        <div className="bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)] overflow-hidden">
           {transactions.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-[var(--color-text-muted)] mb-4">Nenhuma transação encontrada</p>
@@ -258,7 +218,7 @@ export default function TransactionsPage() {
           ) : (
             <div className="divide-y divide-[var(--color-border)]">
               {transactions.map((transaction) => (
-                <div key={transaction._id} className="p-4 hover:bg-[var(--color-bg-elevated)] transition-colors group">
+                <div key={transaction._id} className="p-3 hover:bg-[var(--color-bg-elevated)] transition-colors group">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                       <input
@@ -269,7 +229,7 @@ export default function TransactionsPage() {
                         className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       />
                       <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center"
+                        className="w-10 h-10 rounded-md flex items-center justify-center"
                         style={{ backgroundColor: transaction.categoryId?.color || transaction.goalId?.color || '#6B7280' }}
                       >
                         {transaction.type === 'income' ? (
@@ -282,23 +242,23 @@ export default function TransactionsPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-[var(--color-text)]">{transaction.description}</h3>
+                          <h3 className="text-base font-medium text-[var(--color-text)]">{transaction.description}</h3>
                           {transaction.isFixed && (
-                            <span className="text-xs bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-0.5 rounded-sm font-medium">
                               Fixa
                             </span>
                           )}
                           {transaction.isEffective ? (
-                            <span className="text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] px-2 py-0.5 rounded-sm font-medium">
                               Efetivada
                             </span>
                           ) : (
-                            <span className="text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-0.5 rounded-sm font-medium">
                               Pendente
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[var(--color-text-muted)]">
+                        <p className="text-xs text-[var(--color-text-muted)]">
                           {transaction.type === 'investment'
                             ? (transaction.goalId?.description || 'Sem objetivo')
                             : (transaction.categoryId?.name || 'Sem categoria')}
@@ -307,7 +267,7 @@ export default function TransactionsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className={`text-xl font-bold ${transaction.type === 'income'
+                      <p className={`text-lg font-medium ${transaction.type === 'income'
                         ? 'text-[var(--color-success)]'
                         : transaction.type === 'expense'
                           ? 'text-[var(--color-danger)]'
@@ -319,7 +279,7 @@ export default function TransactionsPage() {
                         {!transaction.isEffective && (
                           <button
                             onClick={() => handleEffectivate([transaction._id])}
-                            className="p-2 rounded-lg hover:bg-[var(--color-success)]/10 text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 rounded-md hover:bg-[var(--color-success)]/10 text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Efetivar"
                             disabled={effectivateLoading}
                           >
@@ -328,14 +288,14 @@ export default function TransactionsPage() {
                         )}
                         <button
                           onClick={() => openEditModal(transaction)}
-                          className="p-2 rounded-lg hover:bg-[var(--color-primary-light)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                          className="p-2 rounded-md hover:bg-[var(--color-primary-light)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                           title="Editar"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => openDeleteModal(transaction)}
-                          className="p-2 rounded-lg hover:bg-[var(--color-danger-light)] text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                          className="p-2 rounded-md hover:bg-[var(--color-danger-light)] text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                           title="Deletar"
                         >
                           <Trash2 size={18} />
@@ -353,7 +313,7 @@ export default function TransactionsPage() {
       {/* Floating Action Button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-[var(--color-action)] text-white rounded-full shadow-2xl hover:bg-[var(--color-action-dark)] transition-all hover:scale-110 cursor-pointer flex items-center justify-center z-50"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-[var(--color-action)] text-white rounded-md shadow-md hover:bg-[var(--color-action-dark)] transition-all hover:scale-105 cursor-pointer flex items-center justify-center z-50"
       >
         <Plus size={32} />
       </button>
@@ -382,7 +342,7 @@ export default function TransactionsPage() {
 
           {deletingTransaction?.isFixed ? (
             <>
-              <p className="text-sm text-[var(--color-warning)] bg-[var(--color-warning)]/10 p-3 rounded-lg border border-[var(--color-warning)]/20">
+              <p className="text-sm text-[var(--color-warning)] bg-[var(--color-warning)]/10 p-3 rounded-md border border-[var(--color-warning)]/20">
                 Esta é uma despesa fixa. Você pode excluir apenas esta ocorrência ou todas as futuras.
               </p>
               <div className="flex flex-col gap-2">

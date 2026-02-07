@@ -54,6 +54,7 @@ export interface BankAccount {
   type: 'checking' | 'payment' | 'salary' | 'savings';
   color: string;
   balance: number;
+  isPrimary?: boolean;
   familyId: string;
   createdBy: string;
   createdAt: string;
