@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { BookOpen, Settings, Users } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import FirstAccessTutorialModal from '@/components/tutorial/FirstAccessTutorialModal';
+import PremiumPlanCard from '@/components/billing/PremiumPlanCard';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function SettingsPage() {
@@ -98,6 +99,8 @@ export default function SettingsPage() {
               Rever tutorial
             </Button>
           </div>
+
+          <PremiumPlanCard variant="settings" />
         </section>
       </div>
 

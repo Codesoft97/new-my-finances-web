@@ -13,7 +13,6 @@ import {
   Users,
   UserPlus,
   Target,
-  Crown,
   Sun,
   Moon,
   Menu,
@@ -27,13 +26,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeProvider';
 import AddMemberModal from '@/components/family/AddMemberModal';
 import { isPremiumFamily } from '@/utils/billing';
+import PremiumPlanCard from '@/components/billing/PremiumPlanCard';
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showAddMember, setShowAddMember] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isFamilyExpanded, setIsFamilyExpanded] = useState(false);
-  const [isPremiumExpanded, setIsPremiumExpanded] = useState(false);
   const pathname = usePathname();
   const { user, family, logout, refreshFamily } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -217,52 +216,7 @@ export default function Sidebar() {
 
           {/* Premium CTA */}
           <div className="p-4 border-b border-[var(--color-border)]">
-            {isExpanded ? (
-              <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => setIsPremiumExpanded(!isPremiumExpanded)}
-                >
-                  <div className="flex items-center gap-2 text-[var(--color-text)]">
-                    <Crown size={18} className={isPremium ? 'text-[var(--color-success)]' : 'text-[var(--color-action)]'} />
-                    <span className="font-semibold">Plano Premium</span>
-                  </div>
-                  {isPremiumExpanded ? (
-                    <ChevronDown size={16} className="text-[var(--color-text-secondary)]" />
-                  ) : (
-                    <ChevronRight size={16} className="text-[var(--color-text-secondary)]" />
-                  )}
-                </div>
-
-                {isPremiumExpanded && (
-                  <div className="mt-2">
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      {isPremium
-                        ? 'Aproveite recursos exclusivos para sua família.'
-                        : 'Desbloqueie Objetivos e recursos exclusivos.'}
-                    </p>
-                    <Link
-                      href="/premium"
-                      className={`mt-3 inline-flex items-center justify-center w-full px-3 py-2 rounded-md font-semibold transition-colors
-                        ${isPremium
-                          ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20'
-                          : 'bg-[var(--color-action)] text-white hover:bg-[var(--color-action-dark)]'}
-                      `}
-                    >
-                      {isPremium ? 'Ver detalhes' : 'Ver planos'}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                href="/premium"
-                className="w-full flex items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 transition-colors"
-                title="Plano Premium"
-              >
-                <Crown size={18} className={isPremium ? 'text-[var(--color-success)]' : 'text-[var(--color-action)]'} />
-              </Link>
-            )}
+            <PremiumPlanCard variant="sidebar" isSidebarExpanded={isExpanded} />
           </div>
 
           {/* Theme Toggle & Logout */}
@@ -324,5 +278,6 @@ export default function Sidebar() {
     </>
   );
 }
+
 
 
