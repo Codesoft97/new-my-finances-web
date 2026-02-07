@@ -2,7 +2,7 @@
 
 import { forwardRef, InputHTMLAttributes, useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { validatePassword, getPasswordStrengthColor } from '@/utils/passwordValidator';
+import { validatePassword } from '@/utils/passwordValidator';
 
 interface PasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;

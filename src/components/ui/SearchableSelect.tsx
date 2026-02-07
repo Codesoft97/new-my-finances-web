@@ -58,14 +58,14 @@ export default function SearchableSelect({
   return (
     <div className="relative" ref={wrapperRef}>
       {label && (
-        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
           {label}
         </label>
       )}
 
       <div
         className={`
-          relative w-full rounded-lg border-2 bg-[var(--color-bg-card)] transition-all cursor-pointer
+          relative w-full rounded-xl border-2 bg-[var(--color-bg-card)] transition-all cursor-pointer
           ${error
             ? 'border-[var(--color-danger)] focus-within:ring-[var(--color-danger)]/20'
             : 'border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-[var(--color-primary)]/20'

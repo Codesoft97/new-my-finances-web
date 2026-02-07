@@ -8,7 +8,7 @@ export default function BillingCancelPage() {
   const router = useRouter();
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-3xl mx-auto bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-8 shadow-sm text-center">
         <div className="w-16 h-16 rounded-full bg-[var(--color-danger)]/10 flex items-center justify-center mx-auto mb-4">
           <XCircle size={32} className="text-[var(--color-danger)]" />

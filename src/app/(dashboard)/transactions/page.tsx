@@ -1,30 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Pencil, Trash2, PieChart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, TrendingUp, TrendingDown, Pencil, Trash2, PieChart, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import MonthSelector from '@/components/ui/MonthSelector';
 import TransactionModal from '@/components/transactions/TransactionModal';
 import { Transaction } from '@/types';
+import SummaryCards from '@/components/summary/SummaryCards';
 import {
   useTransactions,
   useTransactionSummary,
-  useDeleteTransaction
+  useDeleteTransaction,
+  useEffectivateTransactions
 } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
-
-const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
 
 export default function TransactionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
@@ -39,13 +37,30 @@ export default function TransactionsPage() {
   const { bankAccounts, isLoading: accountsLoading } = useBankAccounts();
 
   const deleteMutation = useDeleteTransaction();
+  const effectivateMutation = useEffectivateTransactions();
 
   const transactions = transactionsData?.transactions ?? [];
   const summary = summaryData?.summary ?? { income: 0, expense: 0, balance: 0 };
   const categories = categoriesData?.categories ?? [];
+  const totalInvestments = transactions
+    .filter((transaction) => transaction.type === 'investment' && transaction.isEffective)
+    .reduce((acc, transaction) => acc + transaction.amount, 0);
+  const pendingTransactionIds = transactions.filter((transaction) => !transaction.isEffective).map((transaction) => transaction._id);
+  const allPendingSelected = pendingTransactionIds.length > 0
+    && pendingTransactionIds.every((id) => selectedTransactionIds.includes(id));
 
   // Calculate total balance from bank accounts
   const totalBalance = bankAccounts?.reduce((acc, account) => acc + account.balance, 0) ?? 0;
+
+  useEffect(() => {
+    setSelectedTransactionIds((prev) => {
+      const next = prev.filter((id) => pendingTransactionIds.includes(id));
+      if (next.length === prev.length && next.every((id, index) => id === prev[index])) {
+        return prev;
+      }
+      return next;
+    });
+  }, [pendingTransactionIds]);
 
   const openEditModal = (transaction: Transaction) => {
     setEditingTransaction(transaction);
@@ -60,6 +75,16 @@ export default function TransactionsPage() {
   const openDeleteModal = (transaction: Transaction) => {
     setDeletingTransaction(transaction);
     setIsDeleteModalOpen(true);
+  };
+
+  const toggleTransactionSelection = (id: string) => {
+    setSelectedTransactionIds((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllPending = () => {
+    setSelectedTransactionIds(allPendingSelected ? [] : pendingTransactionIds);
   };
 
   const handleDelete = async (deleteMode: 'single' | 'all') => {
@@ -77,6 +102,24 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleEffectivate = async (ids: string[]) => {
+    if (ids.length === 0) return;
+
+    try {
+      const response = await effectivateMutation.mutateAsync(ids);
+      setSelectedTransactionIds((prev) => prev.filter((id) => !ids.includes(id)));
+
+      if (response?.skipped?.length || response?.notFound?.length) {
+        const updatedCount = response.updated?.length ?? 0;
+        const skippedCount = response.skipped?.length ?? 0;
+        const notFoundCount = response.notFound?.length ?? 0;
+        alert(`Efetivação concluída. ${updatedCount} atualizadas, ${skippedCount} já efetivas, ${notFoundCount} não encontradas.`);
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Erro ao efetivar transações');
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -91,7 +134,8 @@ export default function TransactionsPage() {
   };
 
 
-  const loading = deleteMutation.isPending;
+  const deleteLoading = deleteMutation.isPending;
+  const effectivateLoading = effectivateMutation.isPending;
 
   return (
     <div className="p-4 md:p-8">
@@ -106,62 +150,13 @@ export default function TransactionsPage() {
           </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Income Card */}
-          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="flex items-center justify-between relative z-10">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Entradas</p>
-                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(summary.income)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)] group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp size={24} />
-              </div>
-            </div>
-          </div>
-
-          {/* Expense Card */}
-          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="flex items-center justify-between relative z-10">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Saídas</p>
-                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(summary.expense)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)] group-hover:scale-110 transition-transform duration-300">
-                <TrendingDown size={24} />
-              </div>
-            </div>
-          </div>
-
-          {/* Balance Card */}
-          <div className={`
-            bg-gradient-to-br rounded-2xl p-6 shadow-lg relative overflow-hidden text-white group hover:shadow-xl transition-all
-            ${totalBalance < 0
-              ? 'from-[var(--color-danger)] to-[var(--color-danger-dark)] shadow-[var(--color-danger)]/20 hover:shadow-[var(--color-danger)]/30'
-              : 'from-[var(--color-primary)] to-[var(--color-primary-dark)] shadow-[var(--color-primary)]/20 hover:shadow-[var(--color-primary)]/30'
-            }
-          `}>
-            <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-              <DollarSign size={120} />
-            </div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="min-w-0">
-                <p className={`text-sm font-medium mb-1 ${totalBalance < 0 ? 'text-red-50/80' : 'text-blue-50/80'}`}>Saldo Total (Contas)</p>
-                <h3 className="text-3xl font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(totalBalance)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                <DollarSign size={24} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <SummaryCards
+          income={summary.income}
+          expense={summary.expense}
+          investments={totalInvestments}
+          totalBalance={totalBalance}
+          investmentsLabel="Guardado"
+        />
 
         {/* Filters Header */}
         <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -185,7 +180,7 @@ export default function TransactionsPage() {
                 setSelectedType(e.target.value);
                 setSelectedCategoryId(''); // Reset category when type changes
               }}
-              className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: 'right 1rem center',
@@ -204,7 +199,7 @@ export default function TransactionsPage() {
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               disabled={selectedType === 'investment'}
-              className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 shadow-sm appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: 'right 1rem center',
@@ -225,6 +220,32 @@ export default function TransactionsPage() {
           </div>
         </div>
 
+        {pendingTransactionIds.length > 0 && (
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 p-4 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border-light)]">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={allPendingSelected}
+                onChange={toggleSelectAllPending}
+                className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer"
+              />
+              <span className="text-sm font-semibold text-[var(--color-text)]">
+                Selecionar transações pendentes
+              </span>
+            </label>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={selectedTransactionIds.length === 0 || effectivateLoading}
+              onClick={() => handleEffectivate(selectedTransactionIds)}
+            >
+              {effectivateLoading
+                ? 'Efetivando...'
+                : `Efetivar selecionadas (${selectedTransactionIds.length})`}
+            </Button>
+          </div>
+        )}
+
         {/* Transactions List */}
         <div className="bg-[var(--color-bg-card)] rounded-xl shadow-md overflow-hidden">
           {transactions.length === 0 ? (
@@ -240,6 +261,13 @@ export default function TransactionsPage() {
                 <div key={transaction._id} className="p-4 hover:bg-[var(--color-bg-elevated)] transition-colors group">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedTransactionIds.includes(transaction._id)}
+                        disabled={transaction.isEffective}
+                        onChange={() => toggleTransactionSelection(transaction._id)}
+                        className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      />
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: transaction.categoryId?.color || transaction.goalId?.color || '#6B7280' }}
@@ -260,6 +288,15 @@ export default function TransactionsPage() {
                               Fixa
                             </span>
                           )}
+                          {transaction.isEffective ? (
+                            <span className="text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] px-2 py-0.5 rounded-full font-medium">
+                              Efetivada
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-0.5 rounded-full font-medium">
+                              Pendente
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm text-[var(--color-text-muted)]">
                           {transaction.type === 'investment'
@@ -271,14 +308,24 @@ export default function TransactionsPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <p className={`text-xl font-bold ${transaction.type === 'income'
-                        ? 'text-green-600'
+                        ? 'text-[var(--color-success)]'
                         : transaction.type === 'expense'
-                          ? 'text-red-600'
+                          ? 'text-[var(--color-danger)]'
                           : 'text-[var(--color-primary)]'
                         }`}>
                         {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount)}
                       </p>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!transaction.isEffective && (
+                          <button
+                            onClick={() => handleEffectivate([transaction._id])}
+                            className="p-2 rounded-lg hover:bg-[var(--color-success)]/10 text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Efetivar"
+                            disabled={effectivateLoading}
+                          >
+                            <CheckCircle size={18} />
+                          </button>
+                        )}
                         <button
                           onClick={() => openEditModal(transaction)}
                           className="p-2 rounded-lg hover:bg-[var(--color-primary-light)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
@@ -329,13 +376,13 @@ export default function TransactionsPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-[var(--color-text-secondary)]">
             Tem certeza que deseja excluir a transação <strong>&quot;{deletingTransaction?.description}&quot;</strong>?
           </p>
 
           {deletingTransaction?.isFixed ? (
             <>
-              <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+              <p className="text-sm text-[var(--color-warning)] bg-[var(--color-warning)]/10 p-3 rounded-lg border border-[var(--color-warning)]/20">
                 Esta é uma despesa fixa. Você pode excluir apenas esta ocorrência ou todas as futuras.
               </p>
               <div className="flex flex-col gap-2">
@@ -343,17 +390,17 @@ export default function TransactionsPage() {
                   onClick={() => handleDelete('single')}
                   variant="secondary"
                   fullWidth
-                  disabled={loading}
+                  disabled={deleteLoading}
                 >
                   Excluir apenas esta
                 </Button>
                 <Button
                   onClick={() => handleDelete('all')}
+                  variant="danger"
                   fullWidth
-                  disabled={loading}
-                  className="!bg-red-600 hover:!bg-red-700"
+                  disabled={deleteLoading}
                 >
-                  {loading ? 'Excluindo...' : 'Excluir esta e futuras'}
+                  {deleteLoading ? 'Excluindo...' : 'Excluir esta e futuras'}
                 </Button>
               </div>
             </>
@@ -372,11 +419,11 @@ export default function TransactionsPage() {
               </Button>
               <Button
                 onClick={() => handleDelete('single')}
+                variant="danger"
                 fullWidth
-                disabled={loading}
-                className="!bg-red-600 hover:!bg-red-700"
+                disabled={deleteLoading}
               >
-                {loading ? 'Excluindo...' : 'Excluir'}
+                {deleteLoading ? 'Excluindo...' : 'Excluir'}
               </Button>
             </div>
           )}

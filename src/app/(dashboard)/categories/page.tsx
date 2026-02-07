@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import ColorPicker from '@/components/ui/ColorPicker';
 import { Category } from '@/types';
 import { useCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useCategories';
 
@@ -73,8 +74,8 @@ export default function CategoriesPage() {
   const loading = createMutation.isPending;
 
   return (
-    <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -207,7 +208,7 @@ export default function CategoriesPage() {
 
           {/* Type Selector */}
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
               Tipo
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -253,25 +254,12 @@ export default function CategoriesPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-3">
-              Cor
-            </label>
-            <div className="grid grid-cols-10 gap-2">
-              {COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className={`
-                    w-10 h-10 rounded-lg transition-all cursor-pointer
-                    ${selectedColor === color ? 'ring-4 ring-primary-300 scale-110' : ''}
-                  `}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            label="Cor"
+            colors={COLORS}
+            value={selectedColor}
+            onChange={setSelectedColor}
+          />
 
           <div className="flex gap-3">
             <Button
@@ -305,7 +293,7 @@ export default function CategoriesPage() {
         size="sm"
       >
         <div className="text-center">
-          <p className="text-gray-700 mb-6">
+          <p className="text-[var(--color-text-secondary)] mb-6">
             Tem certeza que deseja deletar a categoria <strong>{categoryToDelete?.name}</strong>?
           </p>
           <div className="flex gap-3">

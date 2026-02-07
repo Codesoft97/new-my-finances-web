@@ -75,34 +75,34 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
     return (
       <Modal isOpen={isOpen} onClose={handleClose} title="Membro Adicionado">
         <div className="text-center py-4">
-          <CheckCircle className="text-green-500 mx-auto mb-4" size={64} />
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Membro adicionado com sucesso!</h3>
+          <CheckCircle className="text-[var(--color-success)] mx-auto mb-4" size={64} />
+          <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Membro adicionado com sucesso!</h3>
 
           {success.setupUrl ? (
             <div className="mt-4">
-              <p className="text-gray-600 mb-4">
+              <p className="text-[var(--color-text-secondary)] mb-4">
                 Compartilhe o link abaixo para que o membro configure sua senha:
               </p>
-              <div className="bg-gray-100 p-3 rounded-lg flex items-center gap-2">
+              <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] p-3 rounded-lg flex items-center gap-2">
                 <input
                   type="text"
                   value={success.setupUrl}
                   readOnly
-                  className="flex-1 bg-transparent text-sm text-gray-700 outline-none"
+                  className="flex-1 bg-transparent text-sm text-[var(--color-text)] outline-none"
                 />
                 <button
                   onClick={() => copyToClipboard(success.setupUrl!)}
-                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  className="p-2 hover:bg-[var(--color-border-light)] rounded transition-colors"
                 >
-                  {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-gray-500" />}
+                  {copied ? <Check size={18} className="text-[var(--color-success)]" /> : <Copy size={18} className="text-[var(--color-text-muted)]" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-[var(--color-text-muted)] mt-2">
                 O link expira em 24 horas.
               </p>
             </div>
           ) : (
-            <p className="text-gray-600">O membro já pode fazer login com a senha definida.</p>
+            <p className="text-[var(--color-text-secondary)]">O membro já pode fazer login com a senha definida.</p>
           )}
 
           <Button className="mt-6" onClick={handleClose}>
@@ -116,8 +116,8 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Adicionar Membro">
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-          <p className="text-sm text-red-600 text-center">{error}</p>
+        <div className="mb-6 p-4 bg-[var(--color-danger)]/10 border-2 border-[var(--color-danger)]/20 rounded-lg">
+          <p className="text-sm text-[var(--color-danger)] text-center">{error}</p>
         </div>
       )}
 
@@ -147,15 +147,15 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
           })}
         />
 
-        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg">
           <input
             type="checkbox"
             id="sendEmailLink"
             checked={sendEmailLink}
             onChange={(e) => setSendEmailLink(e.target.checked)}
-            className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500"
+            className="w-5 h-5 text-[var(--color-primary)] rounded focus:ring-[var(--color-primary)]/30"
           />
-          <label htmlFor="sendEmailLink" className="text-sm text-gray-700 cursor-pointer">
+          <label htmlFor="sendEmailLink" className="text-sm text-[var(--color-text-secondary)] cursor-pointer">
             Gerar link para configurar senha depois
           </label>
         </div>

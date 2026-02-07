@@ -234,6 +234,7 @@ export const transactionService = {
     bankAccountId?: string;
     date?: string;
     isFixed?: boolean;
+    isEffective?: boolean;
   }) => {
     const response = await api.post('/transactions', data);
     return response.data;
@@ -264,6 +265,11 @@ export const transactionService = {
     const response = await api.delete(`/transactions/${id}`, {
       params: { deleteMode },
     });
+    return response.data;
+  },
+
+  effectivate: async (data: { id: string } | { effectivations: { id: string }[] }) => {
+    const response = await api.post('/transactions/effectivate', data);
     return response.data;
   },
 };

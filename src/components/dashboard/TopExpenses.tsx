@@ -72,18 +72,18 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
   return (
     <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-lg p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Lightbulb className="text-amber-500" size={20} />
+        <Lightbulb className="text-[var(--color-warning)]" size={20} />
         <h3 className="text-lg font-semibold text-[var(--color-text)]">Onde Economizar</h3>
       </div>
 
       {/* Warning for high spending */}
       {highSpendingCategories.length > 0 && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="mb-4 p-3 bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 rounded-lg">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={16} />
+            <AlertTriangle className="text-[var(--color-warning)] flex-shrink-0 mt-0.5" size={16} />
             <div>
-              <p className="text-sm text-amber-800 font-medium">Atenção!</p>
-              <p className="text-sm text-amber-700">
+              <p className="text-sm text-[var(--color-warning-dark)] font-medium">Atenção!</p>
+              <p className="text-sm text-[var(--color-warning-dark)]">
                 {highSpendingCategories.length === 1
                   ? `A categoria "${highSpendingCategories[0].categoryName}" está consumindo ${highSpendingCategories[0].percentageOfIncome.toFixed(1)}% da sua receita.`
                   : `${highSpendingCategories.length} categorias estão consumindo mais de 30% da sua receita cada.`
@@ -116,17 +116,17 @@ export default function TopExpenses({ transactions, totalIncome }: TopExpensesPr
               <div className="flex items-center justify-between mt-1">
                 <div className="flex-1 h-2 bg-[var(--color-border)] rounded-full mr-3">
                   <div
-                    className={`h-2 rounded-full transition-all ${cat.percentageOfIncome > 30 ? 'bg-red-500' : cat.percentageOfIncome > 20 ? 'bg-amber-500' : 'bg-green-500'}`}
+                    className={`h-2 rounded-full transition-all ${cat.percentageOfIncome > 30 ? 'bg-[var(--color-danger)]' : cat.percentageOfIncome > 20 ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-success)]'}`}
                     style={{ width: `${Math.min(cat.percentageOfIncome, 100)}%` }}
                   />
                 </div>
-                <span className={`text-sm font-medium whitespace-nowrap ${cat.percentageOfIncome > 30 ? 'text-red-600' : cat.percentageOfIncome > 20 ? 'text-amber-600' : 'text-green-600'}`}>
+                <span className={`text-sm font-medium whitespace-nowrap ${cat.percentageOfIncome > 30 ? 'text-[var(--color-danger)]' : cat.percentageOfIncome > 20 ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]'}`}>
                   {cat.percentageOfIncome.toFixed(1)}%
                 </span>
               </div>
             </div>
             {cat.percentageOfIncome > 30 && (
-              <TrendingDown className="text-red-500 flex-shrink-0" size={20} />
+              <TrendingDown className="text-[var(--color-danger)] flex-shrink-0" size={20} />
             )}
           </div>
         ))}

@@ -6,10 +6,11 @@ import { Plus, Landmark } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import CreateBankAccountModal from '@/components/bank-accounts/CreateBankAccountModal';
 import BankAccountCard from '@/components/bank-accounts/BankAccountCard';
+import Button from '@/components/ui/Button';
 
 export default function BankAccountsPage() {
   const { bankAccounts, isLoading } = useBankAccounts();
-  const [iscreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Maximum of 2 accounts per family
   const canAddAccount = (bankAccounts?.length || 0) < 2;
@@ -19,18 +20,18 @@ export default function BankAccountsPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text)]">Contas Bancárias</h1>
+            <h1 className="text-3xl font-bold text-[var(--color-text)]">Contas Bancárias</h1>
             <p className="text-[var(--color-text-secondary)]">Gerencie suas contas e saldos</p>
           </div>
-          <button
+          <Button
             onClick={() => setIsCreateModalOpen(true)}
             disabled={!canAddAccount}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-dark)] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2"
             title={!canAddAccount ? 'Limite de 2 contas atingido' : 'Criar nova conta'}
           >
             <Plus size={20} />
             <span className="hidden sm:inline">Nova Conta</span>
-          </button>
+          </Button>
         </div>
 
         {isLoading ? (
@@ -48,13 +49,13 @@ export default function BankAccountsPage() {
             <p className="text-[var(--color-text-secondary)] max-w-sm mb-6">
               Cadastre suas contas bancárias para controlar seu saldo e vincular transações.
             </p>
-            <button
+            <Button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-dark)] cursor-pointer transition-colors shadow-lg shadow-primary/20"
+              className="flex items-center gap-2"
             >
               <Plus size={20} />
               Cadastrar Primeira Conta
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -65,7 +66,7 @@ export default function BankAccountsPage() {
         )}
 
         <CreateBankAccountModal
-          isOpen={iscreateModalOpen}
+          isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
         />
       </div>

@@ -71,6 +71,7 @@ export interface Transaction {
   userId: string;
   date: string;
   isFixed: boolean;
+  isEffective: boolean;
   createdAt: string;
   updatedAt: string;
 }

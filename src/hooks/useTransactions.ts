@@ -44,6 +44,7 @@ interface CreateTransactionData {
   bankAccountId?: string;
   date?: string;
   isFixed?: boolean;
+  isEffective?: boolean;
 }
 
 // Mutation: Create transaction
@@ -104,6 +105,34 @@ export function useDeleteTransaction() {
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+    },
+  });
+}
+
+interface EffectivationResponse {
+  updated: string[];
+  skipped: string[];
+  notFound: string[];
+}
+
+// Mutation: Effectivate transactions
+export function useEffectivateTransactions() {
+  const queryClient = useQueryClient();
+
+  return useMutation<EffectivationResponse, unknown, string[]>({
+    mutationFn: (ids: string[]) => {
+      if (ids.length === 1) {
+        return transactionService.effectivate({ id: ids[0] });
+      }
+      return transactionService.effectivate({
+        effectivations: ids.map((id) => ({ id })),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
   });
 }

@@ -18,8 +18,7 @@ export default function RegisterFamilyPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const passwordValue = watch('password', '');
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
   useEffect(() => {
     if (user && !loading) {
@@ -66,8 +65,8 @@ export default function RegisterFamilyPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-            <p className="text-sm text-red-600 text-center">{error}</p>
+          <div className="mb-6 p-4 bg-[var(--color-danger)]/10 border-2 border-[var(--color-danger)]/20 rounded-lg">
+            <p className="text-sm text-[var(--color-danger)] text-center">{error}</p>
           </div>
         )}
 

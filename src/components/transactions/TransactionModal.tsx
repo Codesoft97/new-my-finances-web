@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Plus, TrendingUp, TrendingDown, PieChart, Crown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -34,6 +34,7 @@ interface TransactionFormData {
   goalId: string;
   bankAccountId: string;
   isFixed: boolean;
+  isEffective: boolean;
   date: string;
 }
 
@@ -70,11 +71,13 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
       goalId: '',
       bankAccountId: '',
       isFixed: false,
+      isEffective: false,
       date: getTodayDate()
     }
   });
 
   const transactionType = watch('type');
+  const isFixedTransaction = watch('isFixed');
   const isEditingInvestment = transactionToEdit?.type === 'investment';
   const showInvestmentOption = canUseGoals || isEditingInvestment;
   const blockedByPlan = transactionType === 'investment' && !canUseGoals;
@@ -93,6 +96,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
       setValue('goalId', transactionToEdit.goalId?._id || '');
       setValue('bankAccountId', transactionToEdit.bankAccountId?._id || '');
       setValue('isFixed', transactionToEdit.isFixed);
+      setValue('isEffective', transactionToEdit.isEffective);
       setValue('date', transactionToEdit.date.split('T')[0]);
     } else {
       reset({
@@ -103,27 +107,11 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         goalId: '',
         bankAccountId: '',
         isFixed: false,
+        isEffective: false,
         date: getTodayDate()
       });
     }
   }, [transactionToEdit, setValue, reset]);
-
-  // Clear category selection when transaction type changes (user interaction)
-  useEffect(() => {
-    // Only reset if we are interacting with the form, not when loading edit data
-    // However, simpler logic: if type mismatch, clear category.
-    // But useForm 'watch' triggers on every change. 
-    // We can skip this "auto-clear" for now or implement it carefully.
-    // In the original file, it used a ref `isFirstRender`. 
-    // For this modal, we can rely on user changing the type field.
-    // But `setValue` in the useEffect above also triggers watch.
-
-    // Let's implement a check: if the selected category type doesn't match the transaction type.
-    // But we only have IDs here.
-    // Simpler approach: If not editing or if type changed from what it was.
-    // Let's keep it simple and assume the user will pick a valid category from the filtered list.
-  }, [transactionType]);
-
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
@@ -154,7 +142,8 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
           goalId: (data.type === 'investment' && data.goalId) ? data.goalId : undefined,
           bankAccountId: data.bankAccountId,
           isFixed: data.isFixed,
-          date: data.date
+          date: data.date,
+          ...(data.isEffective ? { isEffective: true } : {})
         });
       }
       handleClose();
@@ -206,23 +195,48 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         />
 
         <div>
-          <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+          <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
             Data
           </label>
           <input
             type="date"
             {...register('date', { required: 'Data é obrigatória' })}
-            className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
+            className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
           />
           {errors.date && (
             <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.date.message}</p>
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-            Tipo
+        {/* Effectivate on creation */}
+        {!transactionToEdit && (
+          <div className="flex items-start gap-3 p-4 bg-[var(--color-bg-elevated)] rounded-lg border border-[var(--color-border)]">
+          <input
+            type="checkbox"
+            id="isEffective"
+            {...register('isEffective')}
+            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer mt-1"
+          />
+          <label htmlFor="isEffective" className="cursor-pointer">
+            <span className="font-medium text-[var(--color-text)]">
+              Efetivar transação agora
+            </span>
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Ao efetivar, a transação impacta saldo da conta e objetivos.
+            </p>
+            {isFixedTransaction && transactionType !== 'investment' && (
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                Para transações fixas, apenas a primeira parcela será efetivada.
+              </p>
+            )}
           </label>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
+          Tipo
+        </label>
           <div className={`grid ${showInvestmentOption ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
             <label className={`
               flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all
@@ -288,10 +302,10 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         )}
 
         <div>
-          {transactionType !== 'investment' && (
+          {transactionType !== 'investment' ? (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
+                <label className="block text-sm font-semibold text-[var(--color-text)] mb-1">
                   Categoria
                 </label>
                 <Controller
@@ -311,7 +325,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
+                <label className="block text-sm font-semibold text-[var(--color-text)] mb-1">
                   Conta / Carteira
                 </label>
                 <Controller
@@ -330,43 +344,65 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
                 />
               </div>
             </div>
-          )}
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                {canUseGoals ? (
+                  <Controller
+                    name="goalId"
+                    control={control}
+                    rules={{ required: 'Objetivo é obrigatório' }}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <SearchableSelect
+                        label="Objetivo"
+                        placeholder="Selecione ou busque um objetivo"
+                        value={value}
+                        onChange={onChange}
+                        error={error?.message}
+                        options={goals.map(g => ({
+                          id: g.id || g._id,
+                          label: g.description,
+                          color: g.color || '#3B82F6'
+                        }))}
+                      />
+                    )}
+                  />
+                ) : (
+                  <div className="p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+                    <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
+                      Objetivos estão disponíveis apenas no Plano Premium
+                    </p>
+                    {transactionToEdit?.goalId?.description && (
+                      <p className="text-xs text-[var(--color-text-secondary)] mb-3">
+                        Objetivo atual: {transactionToEdit.goalId.description}
+                      </p>
+                    )}
+                    <Button size="sm" onClick={() => router.push('/premium')}>
+                      Ver planos Premium
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-          {transactionType === 'investment' && canUseGoals && (
-            <Controller
-              name="goalId"
-              control={control}
-              rules={{ required: 'Objetivo é obrigatório' }}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <SearchableSelect
-                  label="Objetivo"
-                  placeholder="Selecione ou busque um objetivo"
-                  value={value}
-                  onChange={onChange}
-                  error={error?.message}
-                  options={goals.map(g => ({
-                    id: g.id || g._id,
-                    label: g.description,
-                    color: g.color || '#3B82F6'
-                  }))}
+              <div>
+                <label className="block text-sm font-semibold text-[var(--color-text)] mb-1">
+                  Conta / Carteira
+                </label>
+                <Controller
+                  name="bankAccountId"
+                  control={control}
+                  rules={{ required: 'Conta é obrigatória' }}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      options={bankAccounts?.map(b => ({ id: b._id, label: b.name, color: b.color })) || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Selecione..."
+                      error={errors.bankAccountId?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-          )}
-
-          {transactionType === 'investment' && !canUseGoals && (
-            <div className="p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
-              <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
-                Objetivos estão disponíveis apenas no Plano Premium
-              </p>
-              {transactionToEdit?.goalId?.description && (
-                <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-                  Objetivo atual: {transactionToEdit.goalId.description}
-                </p>
-              )}
-              <Button size="sm" onClick={() => router.push('/premium')}>
-                Ver planos Premium
-              </Button>
+              </div>
             </div>
           )}
         </div>

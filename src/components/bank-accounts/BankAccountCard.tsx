@@ -88,7 +88,7 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
                     setIsDeleteModalOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger)]/10 transition-colors text-left"
                 >
                   <Trash2 size={16} />
                   Excluir
@@ -123,7 +123,7 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
           <p className="text-[var(--color-text-secondary)]">
             Tem certeza que deseja excluir a conta <strong>{account.name}</strong>?
             <br />
-            <span className="text-sm text-amber-600 block mt-2">
+            <span className="text-sm text-[var(--color-warning)] block mt-2">
               Todas as transações vinculadas a esta conta serão excluidas junto.
             </span>
           </p>
@@ -139,7 +139,7 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
             <Button
               fullWidth
               onClick={handleDelete}
-              className="!bg-red-600 hover:!bg-red-700 text-white"
+              variant="danger"
             >
               {deleteBankAccount.isPending ? 'Excluindo...' : 'Sim, Excluir'}
             </Button>

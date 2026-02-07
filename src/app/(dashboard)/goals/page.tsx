@@ -7,11 +7,14 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import Modal from '@/components/ui/Modal';
+import ColorPicker from '@/components/ui/ColorPicker';
 import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoals';
 import { Goal } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { isPremiumFamily } from '@/utils/billing';
 import { useRouter } from 'next/navigation';
+
+const GOAL_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'];
 
 export default function GoalsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -319,40 +322,31 @@ export default function GoalsPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
               Data Alvo
             </label>
             <input
               type="date"
               {...register('targetDate', { required: 'Data alvo é obrigatória' })}
-              className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-border)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-[var(--color-bg-card)] text-[var(--color-text)] font-medium cursor-pointer"
             />
             {errors.targetDate && (
               <p className="mt-2 text-sm text-[var(--color-danger)]">{errors.targetDate.message as string}</p>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-              Cor de identificação
-            </label>
-            <div className="flex gap-4 flex-wrap">
-              {['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'].map((color) => (
-                <label key={color} className="cursor-pointer relative">
-                  <input
-                    type="radio"
-                    value={color}
-                    {...register('color')}
-                    className="sr-only peer"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-transparent peer-checked:scale-110 peer-checked:border-[var(--color-text)] transition-all shadow-sm"
-                    style={{ backgroundColor: color }}
-                  />
-                </label>
-              ))}
-            </div>
-          </div>
+          <Controller
+            name="color"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ColorPicker
+                label="Cor de identificação"
+                colors={GOAL_COLORS}
+                value={value}
+                onChange={onChange}
+              />
+            )}
+          />
 
           <div className="flex gap-3 pt-4">
             <Button
