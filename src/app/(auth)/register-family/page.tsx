@@ -18,8 +18,7 @@ export default function RegisterFamilyPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const passwordValue = watch('password', '');
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
   useEffect(() => {
     if (user && !loading) {
@@ -53,11 +52,11 @@ export default function RegisterFamilyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-bg)]">
-      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
+      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4 md:p-6 w-full max-w-md">
+        <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Image src="/logo.svg" alt="DuoFinance" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">DuoFinance</h1>
+            <Image src="/logo.svg" alt="DuoFinance" width={60} height={60} className="rounded-md" />
+            <h1 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">DuoFinance</h1>
           </div>
           <div className="flex items-center justify-center gap-2 text-[var(--color-text-secondary)]">
             <Users size={20} />
@@ -66,8 +65,8 @@ export default function RegisterFamilyPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-            <p className="text-sm text-red-600 text-center">{error}</p>
+          <div className="mb-6 p-4 bg-[var(--color-danger)]/10 border-2 border-[var(--color-danger)]/20 rounded-lg">
+            <p className="text-sm text-[var(--color-danger)] text-center">{error}</p>
           </div>
         )}
 

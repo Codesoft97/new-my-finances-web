@@ -8,7 +8,7 @@ import GoogleAuthProvider from '@/providers/GoogleAuthProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'DuoFinance',
+  title: 'DuoFinance - Controle financeiro para casais',
   description: 'Controle financeiro para casais',
   icons: {
     icon: "/icon.svg",

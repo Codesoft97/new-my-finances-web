@@ -106,8 +106,8 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
     return (
       <div className={`
         w-full flex items-center justify-center gap-3
-        px-4 py-3 rounded-xl font-semibold
-        border-2 animate-pulse
+        px-3 py-2 rounded-md font-medium
+        border animate-pulse
         ${resolvedTheme === 'dark'
           ? 'bg-[#131314] border-[#8e918f] text-[#e3e3e3]'
           : 'bg-white border-[#747775] text-[#1f1f1f]'

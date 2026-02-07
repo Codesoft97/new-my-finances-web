@@ -96,7 +96,7 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
           </label>
         )}
         <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] font-medium">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] font-medium">
             R$
           </span>
           <input
@@ -108,13 +108,13 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             className={`
-              w-full pl-12 pr-4 py-3 rounded-xl border-2 font-medium text-right text-lg
+              w-full pl-10 pr-3 py-2 rounded-md border font-medium text-right text-base
               bg-[var(--color-bg-card)] text-[var(--color-text)]
               ${error
                 ? 'border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger-light)]'
                 : 'border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary-light)]'
               }
-              focus:outline-none focus:ring-4
+              focus:outline-none focus:ring-2
               ${className}
             `}
             {...rest}

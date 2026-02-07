@@ -1,104 +1,137 @@
 'use client';
+import { useMemo, useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
-import { useTransactions, useTransactionSummary } from '@/hooks/useTransactions';
+import { transactionKeys } from '@/hooks/useTransactions';
 import ExpensesByCategory from '@/components/dashboard/ExpensesByCategory';
 import FixedVsVariableExpenses from '@/components/dashboard/FixedVsVariableExpenses';
 import TopExpenses from '@/components/dashboard/TopExpenses';
+import DateRangeFilter, { DateRangeFilterValue } from '@/components/ui/DateRangeFilter';
+import { useBankAccounts } from '@/hooks/useBankAccounts';
+import BankAccountCard from '@/components/bank-accounts/BankAccountCard';
+import SummaryCards from '@/components/summary/SummaryCards';
+import { transactionService } from '@/services/api';
+
+const shiftMonth = (month: number, year: number, offset: number) => {
+  let nextMonth = month + offset;
+  let nextYear = year;
+
+  while (nextMonth <= 0) {
+    nextMonth += 12;
+    nextYear -= 1;
+  }
+
+  while (nextMonth > 12) {
+    nextMonth -= 12;
+    nextYear += 1;
+  }
+
+  return { month: nextMonth, year: nextYear };
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
   const currentDate = new Date();
-  const month = currentDate.getMonth() + 1;
-  const year = currentDate.getFullYear();
+  const [dateFilter, setDateFilter] = useState<DateRangeFilterValue>({
+    mode: 'month',
+    month: currentDate.getMonth() + 1,
+    year: currentDate.getFullYear(),
+  });
 
-  const { data: transactionsData, isLoading: transactionsLoading } = useTransactions(month, year);
-  const { data: summaryData, isLoading: summaryLoading } = useTransactionSummary(month, year);
+  const { bankAccounts, isLoading: accountsLoading } = useBankAccounts();
 
-  const transactions = transactionsData?.transactions ?? [];
-  const summary = summaryData?.summary ?? { income: 0, expense: 0, balance: 0 };
-  const loading = transactionsLoading || summaryLoading;
+  const monthsToFetch = useMemo(() => {
+    const { mode, month, year } = dateFilter;
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
+    if (mode === 'month') {
+      return [{ month, year }];
+    }
 
-  const currentMonth = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    if (mode === 'year') {
+      return Array.from({ length: 12 }, (_, index) => ({
+        month: index + 1,
+        year,
+      }));
+    }
+
+    const count = mode === 'last3' ? 3 : 6;
+    return Array.from({ length: count }, (_, index) => shiftMonth(month, year, index - (count - 1)));
+  }, [dateFilter]);
+
+  const transactionQueries = useQueries({
+    queries: monthsToFetch.map(({ month, year }) => ({
+      queryKey: [...transactionKeys.list(month, year), { type: undefined, categoryId: undefined }],
+      queryFn: () => transactionService.list({ month, year }),
+    })),
+  });
+
+  const transactions = transactionQueries.flatMap((query) => query.data?.transactions ?? []);
+  const transactionsLoading = transactionQueries.some((query) => query.isLoading);
+
+  const summary = useMemo(() => {
+    const effective = transactions.filter((transaction) => transaction.isEffective);
+    const income = effective
+      .filter((transaction) => transaction.type === 'income')
+      .reduce((acc, transaction) => acc + transaction.amount, 0);
+    const expense = effective
+      .filter((transaction) => transaction.type === 'expense')
+      .reduce((acc, transaction) => acc + transaction.amount, 0);
+    return { income, expense, balance: income - expense };
+  }, [transactions]);
+
+  const totalInvestments = transactions
+    .filter((transaction) => transaction.type === 'investment' && transaction.isEffective)
+    .reduce((acc, transaction) => acc + transaction.amount, 0);
+
+  // Calculate total balance from bank accounts
+  const totalBalance = bankAccounts?.reduce((acc, account) => acc + account.balance, 0) ?? 0;
+
+  const loading = transactionsLoading || accountsLoading;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[var(--color-text)] mb-2">
+        <div className="mb-6">
+          <h1 className="text-2xl font-medium text-[var(--color-text)] mb-1">
             Olá, {user?.name}!
           </h1>
-          <p className="text-[var(--color-text-secondary)]">
-            Confira seu resumo financeiro de {currentMonth}
+          <p className="text-sm text-[var(--color-text-secondary)] mb-5">
+            Confira seu resumo financeiro
           </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Income Card */}
-          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="flex items-center justify-between relative z-10">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Entradas</p>
-                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(summary.income)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)] group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp size={24} />
-              </div>
-            </div>
-          </div>
+        <SummaryCards
+          income={summary.income}
+          expense={summary.expense}
+          investments={totalInvestments}
+          totalBalance={totalBalance}
+          investmentsLabel="Guardado"
+        />
 
-          {/* Expense Card */}
-          <div className="bg-[var(--color-bg-card)] rounded-2xl p-6 shadow-sm border border-[var(--color-border-light)] relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="flex items-center justify-between relative z-10">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Saídas</p>
-                <h3 className="text-2xl font-bold text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(summary.expense)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)] group-hover:scale-110 transition-transform duration-300">
-                <TrendingDown size={24} />
-              </div>
+        {/* Bank Accounts */}
+        <div className="mb-6">
+          <h2 className="text-base font-medium text-[var(--color-text)] mb-2">Minhas Contas</h2>
+          {bankAccounts?.length === 0 ? (
+            <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-center text-[var(--color-text-secondary)]">
+              Nenhuma conta cadastrada
             </div>
-          </div>
-
-          {/* Balance Card */}
-          <div className={`
-            bg-gradient-to-br rounded-2xl p-6 shadow-lg relative overflow-hidden text-white group hover:shadow-xl transition-all
-            ${summary.balance < 0
-              ? 'from-[var(--color-danger)] to-[var(--color-danger-dark)] shadow-[var(--color-danger)]/20 hover:shadow-[var(--color-danger)]/30'
-              : 'from-[var(--color-primary)] to-[var(--color-primary-dark)] shadow-[var(--color-primary)]/20 hover:shadow-[var(--color-primary)]/30'
-            }
-          `}>
-            <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-              <DollarSign size={120} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {bankAccounts?.map((account) => (
+                <BankAccountCard key={account._id} account={account} />
+              ))}
             </div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="min-w-0">
-                <p className={`text-sm font-medium mb-1 ${summary.balance < 0 ? 'text-red-50/80' : 'text-blue-50/80'}`}>Saldo Total</p>
-                <h3 className="text-3xl font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formatCurrency(summary.balance)}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                <DollarSign size={24} />
-              </div>
-            </div>
-          </div>
+          )}
         </div>
+
+        <DateRangeFilter
+          value={dateFilter}
+          onChange={setDateFilter}
+          className="mb-4"
+        />
 
         {/* Analytics Section */}
         {loading ? (
@@ -106,7 +139,7 @@ export default function DashboardPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Expenses by Category */}
             <ExpensesByCategory
               transactions={transactions}

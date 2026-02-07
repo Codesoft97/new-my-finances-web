@@ -133,13 +133,25 @@ export const authService = {
   },
 };
 
+export const billingService = {
+  checkout: async (plan: 'monthly' | 'annual') => {
+    const response = await api.post('/billing/checkout', { plan });
+    return response.data;
+  },
+
+  portal: async () => {
+    const response = await api.post('/billing/portal');
+    return response.data;
+  },
+};
+
 export const categoryService = {
-  list: async (type?: 'income' | 'expense') => {
+  list: async (type?: 'income' | 'expense' | 'investment') => {
     const response = await api.get('/categories', { params: type ? { type } : {} });
     return response.data;
   },
 
-  create: async (data: { name: string; color: string; type: 'income' | 'expense' }) => {
+  create: async (data: { name: string; color: string; type: 'income' | 'expense' | 'investment' }) => {
     const response = await api.post('/categories', data);
     return response.data;
   },
@@ -150,8 +162,65 @@ export const categoryService = {
   },
 };
 
+export const goalService = {
+  list: async () => {
+    const response = await api.get('/goals');
+    return response.data;
+  },
+
+  create: async (data: {
+    description: string;
+    totalAmount: number;
+    targetDate: string;
+    initialAmount?: number;
+    color: string;
+  }) => {
+    const response = await api.post('/goals', data);
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: {
+      description?: string;
+      totalAmount?: number;
+      targetDate?: string;
+      initialAmount?: number;
+      color?: string;
+    }
+  ) => {
+    const response = await api.put(`/goals/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string, cascade: boolean = false) => {
+    await api.delete(`/goals/${id}`, { params: { cascade } });
+  },
+};
+
+export const bankAccountService = {
+  list: async () => {
+    const response = await api.get('/bank-accounts');
+    return response.data;
+  },
+  create: async (data: { name: string; type: string; color: string; initialBalance: number }) => {
+    const response = await api.post('/bank-accounts', data);
+    return response.data;
+  },
+  update: async (id: string, data: { name: string; color: string }) => {
+    const response = await api.put(`/bank-accounts/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/bank-accounts/${id}`);
+    return response.data;
+  },
+};
+
+
+
 export const transactionService = {
-  list: async (params?: { month?: number; year?: number }) => {
+  list: async (params?: { month?: number; year?: number; type?: string; categoryId?: string }) => {
     const response = await api.get('/transactions', { params });
     return response.data;
   },
@@ -159,10 +228,13 @@ export const transactionService = {
   create: async (data: {
     description: string;
     amount: number;
-    type: 'income' | 'expense';
-    categoryId: string;
+    type: 'income' | 'expense' | 'investment';
+    categoryId?: string;
+    goalId?: string;
+    bankAccountId?: string;
     date?: string;
     isFixed?: boolean;
+    isEffective?: boolean;
   }) => {
     const response = await api.post('/transactions', data);
     return response.data;
@@ -178,8 +250,10 @@ export const transactionService = {
     data: {
       description?: string;
       amount?: number;
-      type?: 'income' | 'expense';
+      type?: 'income' | 'expense' | 'investment';
       categoryId?: string;
+      goalId?: string;
+      bankAccountId?: string;
       date?: string;
     }
   ) => {
@@ -191,6 +265,11 @@ export const transactionService = {
     const response = await api.delete(`/transactions/${id}`, {
       params: { deleteMode },
     });
+    return response.data;
+  },
+
+  effectivate: async (data: { id: string } | { effectivations: { id: string }[] }) => {
+    const response = await api.post('/transactions/effectivate', data);
     return response.data;
   },
 };

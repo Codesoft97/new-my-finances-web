@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoryService } from '@/services/api';
+import { transactionKeys } from '@/hooks/useTransactions';
 import { Category } from '@/types';
 
 // Query keys for cache management
@@ -48,6 +49,8 @@ export function useDeleteCategory() {
     mutationFn: (id: string) => categoryService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
     },
   });
 }

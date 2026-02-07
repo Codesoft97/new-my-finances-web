@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from '@/components/layout/Sidebar';
+import FirstAccessTutorial from '@/components/tutorial/FirstAccessTutorial';
 
 export default function DashboardLayout({
   children,
@@ -35,11 +36,12 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)]">
+    <div className="min-h-screen bg-[var(--color-bg)] flex">
       <Sidebar />
       <main className="flex-1">
         {children}
       </main>
+      <FirstAccessTutorial />
     </div>
   );
 }

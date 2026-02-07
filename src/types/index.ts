@@ -14,6 +14,12 @@ export interface Family {
   id: string;
   name: string;
   memberCount: number;
+  plan?: 'free' | 'premium';
+  subscriptionStatus?: 'active' | 'none' | 'trialing' | 'past_due' | 'canceled' | 'incomplete' | 'incomplete_expired';
+  planInterval?: 'monthly' | 'annual';
+  currentPeriodEnd?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  trialEndsAt?: string | null;
   members?: FamilyMember[];
 }
 
@@ -27,15 +33,46 @@ export interface Category {
   updatedAt: string;
 }
 
+export interface Goal {
+  _id: string; // Mongoose default
+  id?: string;  // API response variant
+  description: string;
+  totalAmount: number;
+  valorAportado: number;
+  valorRestante: number;
+  aporteMensalNecessario: number;
+  targetDate: string;
+  color: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BankAccount {
+  _id: string;
+  name: string;
+  type: 'checking' | 'payment' | 'salary' | 'savings';
+  color: string;
+  balance: number;
+  isPrimary?: boolean;
+  familyId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   _id: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
-  categoryId: Category;
+  type: 'income' | 'expense' | 'investment';
+  categoryId?: Category; // Make optional for investment type
+  goalId?: Goal; // Add optional goal reference
+  bankAccountId?: BankAccount;
   userId: string;
   date: string;
   isFixed: boolean;
+  isEffective: boolean;
   createdAt: string;
   updatedAt: string;
 }

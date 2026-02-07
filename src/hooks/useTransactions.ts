@@ -19,11 +19,11 @@ interface SummaryData {
   summary: TransactionSummary;
 }
 
-// Query: Get transactions for a specific month/year
-export function useTransactions(month: number, year: number) {
+// Query: Get transactions for a specific month/year with optional filters
+export function useTransactions(month: number, year: number, type?: string, categoryId?: string) {
   return useQuery<TransactionsData>({
-    queryKey: transactionKeys.list(month, year),
-    queryFn: () => transactionService.list({ month, year }),
+    queryKey: [...transactionKeys.list(month, year), { type, categoryId }],
+    queryFn: () => transactionService.list({ month, year, type, categoryId }),
   });
 }
 
@@ -38,10 +38,13 @@ export function useTransactionSummary(month: number, year: number) {
 interface CreateTransactionData {
   description: string;
   amount: number;
-  type: 'income' | 'expense';
-  categoryId: string;
+  type: 'income' | 'expense' | 'investment';
+  categoryId?: string;
+  goalId?: string;
+  bankAccountId?: string;
   date?: string;
   isFixed?: boolean;
+  isEffective?: boolean;
 }
 
 // Mutation: Create transaction
@@ -54,6 +57,7 @@ export function useCreateTransaction() {
       // Invalidate all transaction lists and summaries
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
     },
   });
 }
@@ -63,8 +67,10 @@ interface UpdateTransactionData {
   data: {
     description?: string;
     amount?: number;
-    type?: 'income' | 'expense';
+    type?: 'income' | 'expense' | 'investment';
     categoryId?: string;
+    goalId?: string;
+    bankAccountId?: string;
     date?: string;
   };
 }
@@ -78,6 +84,7 @@ export function useUpdateTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
     },
   });
 }
@@ -97,6 +104,35 @@ export function useDeleteTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+    },
+  });
+}
+
+interface EffectivationResponse {
+  updated: string[];
+  skipped: string[];
+  notFound: string[];
+}
+
+// Mutation: Effectivate transactions
+export function useEffectivateTransactions() {
+  const queryClient = useQueryClient();
+
+  return useMutation<EffectivationResponse, unknown, string[]>({
+    mutationFn: (ids: string[]) => {
+      if (ids.length === 1) {
+        return transactionService.effectivate({ id: ids[0] });
+      }
+      return transactionService.effectivate({
+        effectivations: ids.map((id) => ({ id })),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.summaries() });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
   });
 }
