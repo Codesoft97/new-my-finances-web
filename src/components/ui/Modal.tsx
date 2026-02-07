@@ -9,18 +9,34 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  zIndexClass?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  zIndexClass = 'z-[100]',
+}: ModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (!isOpen) return;
+
+    const body = document.body;
+    const currentCount = Number(body.dataset.modalCount || '0');
+    const nextCount = currentCount + 1;
+    body.dataset.modalCount = String(nextCount);
+    body.style.overflow = 'hidden';
 
     return () => {
-      document.body.style.overflow = 'unset';
+      const updatedCount = Number(body.dataset.modalCount || '1') - 1;
+      if (updatedCount <= 0) {
+        delete body.dataset.modalCount;
+        body.style.overflow = 'unset';
+      } else {
+        body.dataset.modalCount = String(updatedCount);
+      }
     };
   }, [isOpen]);
 
@@ -33,7 +49,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className={`fixed inset-0 ${zIndexClass} flex items-center justify-center`}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40"

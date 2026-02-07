@@ -14,9 +14,15 @@ interface AddMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
   onMemberAdded?: () => void;
+  modalZIndexClass?: string;
 }
 
-export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModalProps) {
+export default function AddMemberModal({
+  isOpen,
+  onClose,
+  onMemberAdded,
+  modalZIndexClass,
+}: AddMemberModalProps) {
   const { addMember } = useAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -73,7 +79,12 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
 
   if (success) {
     return (
-      <Modal isOpen={isOpen} onClose={handleClose} title="Membro Adicionado">
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Membro Adicionado"
+        zIndexClass={modalZIndexClass}
+      >
         <div className="text-center py-4">
           <CheckCircle className="text-[var(--color-success)] mx-auto mb-4" size={64} />
           <h3 className="text-base font-medium text-[var(--color-text)] mb-2">Membro adicionado com sucesso!</h3>
@@ -114,7 +125,12 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Adicionar Membro">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Adicionar Membro"
+      zIndexClass={modalZIndexClass}
+    >
       {error && (
         <div className="mb-6 p-4 bg-[var(--color-danger)]/10 border-2 border-[var(--color-danger)]/20 rounded-lg">
           <p className="text-sm text-[var(--color-danger)] text-center">{error}</p>
@@ -156,7 +172,7 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMe
             className="w-5 h-5 text-[var(--color-primary)] rounded focus:ring-[var(--color-primary)]/30"
           />
           <label htmlFor="sendEmailLink" className="text-sm text-[var(--color-text-secondary)] cursor-pointer">
-            Gerar link para configurar senha depois
+            Enviar um e-mail com link para configurar senha depois
           </label>
         </div>
 

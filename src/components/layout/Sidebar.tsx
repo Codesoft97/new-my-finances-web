@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   ChevronDown,
-  Landmark
+  Landmark,
+  Settings
 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,6 +54,7 @@ export default function Sidebar() {
     { icon: FolderOpen, label: 'Categorias', href: '/categories' },
     { icon: Landmark, label: 'Contas', href: '/bank-accounts' },
     ...(isPremium ? [{ icon: Target, label: 'Objetivos', href: '/goals' }] : []),
+    { icon: Settings, label: 'Configurações', href: '/settings' },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -322,3 +324,5 @@ export default function Sidebar() {
     </>
   );
 }
+
+
