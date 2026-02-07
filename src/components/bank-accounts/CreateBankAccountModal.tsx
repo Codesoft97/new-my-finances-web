@@ -13,6 +13,7 @@ import Input from '@/components/ui/Input';
 interface CreateBankAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
+  modalZIndexClass?: string;
 }
 
 interface CreateBankAccountFormData {
@@ -33,7 +34,11 @@ const COLORS = [
   '#00C9FF', // Cyan
 ];
 
-export default function CreateBankAccountModal({ isOpen, onClose }: CreateBankAccountModalProps) {
+export default function CreateBankAccountModal({
+  isOpen,
+  onClose,
+  modalZIndexClass,
+}: CreateBankAccountModalProps) {
   const { createBankAccount } = useBankAccounts();
   const [error, setError] = useState('');
 
@@ -74,6 +79,7 @@ export default function CreateBankAccountModal({ isOpen, onClose }: CreateBankAc
       onClose={handleClose}
       title="Nova Conta Bancária"
       size="sm"
+      zIndexClass={modalZIndexClass}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
@@ -142,3 +148,4 @@ export default function CreateBankAccountModal({ isOpen, onClose }: CreateBankAc
     </Modal>
   );
 }
+
