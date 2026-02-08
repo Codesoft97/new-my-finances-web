@@ -26,6 +26,7 @@ interface CreateCategoryData {
   name: string;
   color: string;
   type: 'income' | 'expense';
+  essential: boolean;
 }
 
 // Mutation: Create category

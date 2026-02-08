@@ -151,7 +151,7 @@ export const categoryService = {
     return response.data;
   },
 
-  create: async (data: { name: string; color: string; type: 'income' | 'expense' | 'investment' }) => {
+  create: async (data: { name: string; color: string; type: 'income' | 'expense' | 'investment'; essential: boolean }) => {
     const response = await api.post('/categories', data);
     return response.data;
   },

@@ -149,7 +149,7 @@ describe('API Services', () => {
   describe('categoryService', () => {
     describe('list', () => {
       it('sends GET request to fetch categories', async () => {
-        const response = { data: { categories: [{ _id: '1', name: 'Food', color: '#ff0000' }] } };
+        const response = { data: { categories: [{ _id: '1', name: 'Food', color: '#ff0000', essential: true }] } };
         mockedAxios.get.mockResolvedValueOnce(response);
 
         const result = await categoryService.list();
@@ -161,7 +161,7 @@ describe('API Services', () => {
 
     describe('create', () => {
       it('sends POST request with category data', async () => {
-        const categoryData = { name: 'Transport', color: '#00ff00', type: 'expense' as const };
+        const categoryData = { name: 'Transport', color: '#00ff00', type: 'expense' as const, essential: true };
         const response = { data: { category: { ...categoryData, _id: '2' } } };
         mockedAxios.post.mockResolvedValueOnce(response);
 

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { transactionKeys } from '@/hooks/useTransactions';
 import ExpensesByCategory from '@/components/dashboard/ExpensesByCategory';
 import FixedVsVariableExpenses from '@/components/dashboard/FixedVsVariableExpenses';
+import EssentialVsNonEssentialExpenses from '@/components/dashboard/EssentialVsNonEssentialExpenses';
 import TopExpenses from '@/components/dashboard/TopExpenses';
 import DateRangeFilter, { DateRangeFilterValue } from '@/components/ui/DateRangeFilter';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
@@ -151,6 +152,13 @@ export default function DashboardPage() {
               transactions={transactions}
               totalIncome={summary.income}
             />
+
+            <div className="lg:col-span-2">
+              <EssentialVsNonEssentialExpenses
+                transactions={transactions}
+                totalIncome={summary.income}
+              />
+            </div>
 
             {/* Top Expenses - Full Width */}
             <div className="lg:col-span-2">
