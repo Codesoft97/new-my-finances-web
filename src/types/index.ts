@@ -28,6 +28,7 @@ export interface Category {
   name: string;
   color: string;
   type: 'income' | 'expense';
+  essential: boolean;
   userId: string;
   createdAt: string;
   updatedAt: string;

@@ -23,6 +23,7 @@ export default function CategoriesPage() {
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
   const [selectedType, setSelectedType] = useState<'income' | 'expense'>('expense');
+  const [selectedEssential, setSelectedEssential] = useState(false);
 
   // React Query hooks
   const { data: categoriesData } = useCategories();
@@ -50,12 +51,14 @@ export default function CategoriesPage() {
       await createMutation.mutateAsync({
         name: data.name,
         color: selectedColor,
-        type: selectedType
+        type: selectedType,
+        essential: selectedType === 'expense' ? selectedEssential : false
       });
       setIsModalOpen(false);
       reset();
       setSelectedColor(COLORS[0]);
       setSelectedType('expense');
+      setSelectedEssential(false);
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao criar categoria');
     }
@@ -180,7 +183,17 @@ export default function CategoriesPage() {
                       </div>
                       <div>
                         <h3 className="font-medium text-[var(--color-text)]">{category.name}</h3>
-                        <p className="text-sm text-[var(--color-danger)]">Despesa</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm text-[var(--color-danger)]">Despesa</p>
+                          <span
+                            className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-medium ${category.essential
+                              ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                              : 'bg-[var(--color-warning)]/10 text-[var(--color-warning-dark)]'
+                            }`}
+                          >
+                            {category.essential ? 'Essencial' : 'Não essencial'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <button
@@ -214,6 +227,7 @@ export default function CategoriesPage() {
           reset();
           setSelectedColor(COLORS[0]);
           setSelectedType('expense');
+          setSelectedEssential(false);
         }}
         title="Nova Categoria"
       >
@@ -276,6 +290,26 @@ export default function CategoriesPage() {
             </div>
           </div>
 
+          {selectedType === 'expense' && (
+            <div className="flex items-start gap-3 p-3 bg-[var(--color-bg-elevated)] rounded-md border border-[var(--color-border)]">
+              <input
+                type="checkbox"
+                id="essential"
+                checked={selectedEssential}
+                onChange={(event) => setSelectedEssential(event.target.checked)}
+                className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer mt-1"
+              />
+              <label htmlFor="essential" className="cursor-pointer">
+                <span className="font-medium text-[var(--color-text)]">
+                  Despesa essencial
+                </span>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  Marque se esta categoria representa gastos basicos do mês.
+                </p>
+              </label>
+            </div>
+          )}
+
           <ColorPicker
             label="Cor"
             colors={COLORS}
@@ -293,6 +327,7 @@ export default function CategoriesPage() {
                 reset();
                 setSelectedColor(COLORS[0]);
                 setSelectedType('expense');
+                setSelectedEssential(false);
               }}
             >
               Cancelar
