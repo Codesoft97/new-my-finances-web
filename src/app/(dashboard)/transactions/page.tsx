@@ -258,11 +258,23 @@ export default function TransactionsPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[var(--color-text-muted)]">
-                          {transaction.type === 'investment'
-                            ? (transaction.goalId?.description || 'Sem objetivo')
-                            : (transaction.categoryId?.name || 'Sem categoria')}
-                          • {formatDate(transaction.date)}
+                        <p className="text-xs text-[var(--color-text-muted)] flex flex-wrap items-center gap-2">
+                          <span>
+                            {transaction.type === 'investment'
+                              ? (transaction.goalId?.description || 'Sem objetivo')
+                              : (transaction.categoryId?.name || 'Sem categoria')}
+                          </span>
+                          {transaction.type === 'expense' && transaction.categoryId && (
+                            <span
+                              className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-medium ${transaction.categoryId.essential
+                                ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                                : 'bg-[var(--color-warning)]/10 text-[var(--color-warning-dark)]'
+                              }`}
+                            >
+                              {transaction.categoryId.essential ? 'Essencial' : 'Não essencial'}
+                            </span>
+                          )}
+                          <span>• {formatDate(transaction.date)}</span>
                         </p>
                       </div>
                     </div>

@@ -111,6 +111,11 @@ export default function GoalsPage() {
     }).format(value);
   };
 
+  const formatMonthlyNeeded = (value?: number | null) => {
+    if (typeof value !== 'number') return '-';
+    return formatCurrency(value);
+  };
+
   const formatDate = (dateString: string) => {
     const [year, month, day] = dateString.split('T')[0].split('-');
     return `${day}/${month}/${year}`;
@@ -264,6 +269,10 @@ export default function GoalsPage() {
                       Faltam: <strong>{formatCurrency(goal.valorRestante)}</strong>
                     </div>
                   )}
+
+                  <div className="mt-2 text-xs text-center bg-[var(--color-bg-elevated)] py-1 rounded px-2 text-[var(--color-text-secondary)]">
+                    Guardar por mes: <strong>{formatMonthlyNeeded(goal.aporteMensalNecessario)}</strong>
+                  </div>
                 </div>
               );
             })}
