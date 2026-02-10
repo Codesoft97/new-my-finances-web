@@ -19,6 +19,7 @@ import {
   X,
   ChevronDown,
   Landmark,
+  CreditCard,
   Settings
 } from 'lucide-react';
 import Image from 'next/image';
@@ -52,6 +53,7 @@ export default function Sidebar() {
     { icon: TrendingUp, label: 'Transações', href: '/transactions' },
     { icon: FolderOpen, label: 'Categorias', href: '/categories' },
     { icon: Landmark, label: 'Contas', href: '/bank-accounts' },
+    { icon: CreditCard, label: 'Cartões', href: '/credit-cards' },
     ...(isPremium ? [{ icon: Target, label: 'Objetivos', href: '/goals' }] : []),
     { icon: Settings, label: 'Configurações', href: '/settings' },
   ];

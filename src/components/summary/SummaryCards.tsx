@@ -1,12 +1,17 @@
 'use client';
 
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PiggyBank, Clock } from 'lucide-react';
+
+interface CardValues {
+  effective: number;
+  predicted: number;
+}
 
 interface SummaryCardsProps {
-  income: number;
-  expense: number;
-  investments: number;
-  totalBalance: number;
+  income: CardValues;
+  expense: CardValues;
+  investments: CardValues;
+  balance: CardValues;
   balanceLabel?: string;
   investmentsLabel?: string;
 }
@@ -15,8 +20,8 @@ export default function SummaryCards({
   income,
   expense,
   investments,
-  totalBalance,
-  balanceLabel = 'Saldo Total (Contas)',
+  balance,
+  balanceLabel = 'Saldo',
   investmentsLabel = 'Aportes'
 }: SummaryCardsProps) {
   const formatCurrency = (value: number) => {
@@ -25,6 +30,18 @@ export default function SummaryCards({
       currency: 'BRL'
     }).format(value);
   };
+
+  const PredictedRow = ({ value }: { value: number }) => (
+    <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+      <div className="flex items-center justify-between text-xs">
+        <span className="flex items-center gap-1.5 text-[var(--color-warning)]">
+          <Clock size={12} />
+          Previsto
+        </span>
+        <span className="font-medium text-[var(--color-text-secondary)]">{formatCurrency(value)}</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-4 mb-6">
@@ -35,13 +52,14 @@ export default function SummaryCards({
             <div>
               <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1 tracking-wide uppercase">Entradas</p>
               <h3 className="text-lg font-medium text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                {formatCurrency(income)}
+                {formatCurrency(income.effective)}
               </h3>
             </div>
             <div className="w-9 h-9 rounded-md bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)]">
               <TrendingUp size={18} />
             </div>
           </div>
+          <PredictedRow value={income.predicted} />
         </div>
 
         {/* Expense Card */}
@@ -50,13 +68,14 @@ export default function SummaryCards({
             <div>
               <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1 tracking-wide uppercase">Saídas</p>
               <h3 className="text-lg font-medium text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                {formatCurrency(expense)}
+                {formatCurrency(expense.effective)}
               </h3>
             </div>
             <div className="w-9 h-9 rounded-md bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)]">
               <TrendingDown size={18} />
             </div>
           </div>
+          <PredictedRow value={expense.predicted} />
         </div>
 
         {/* Investments Card */}
@@ -65,13 +84,14 @@ export default function SummaryCards({
             <div>
               <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1 tracking-wide uppercase">{investmentsLabel}</p>
               <h3 className="text-lg font-medium text-[var(--color-text)] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-                {formatCurrency(investments)}
+                {formatCurrency(investments.effective)}
               </h3>
             </div>
             <div className="w-9 h-9 rounded-md bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
               <PiggyBank size={18} />
             </div>
           </div>
+          <PredictedRow value={investments.predicted} />
         </div>
 
         {/* Balance Card */}
@@ -80,13 +100,14 @@ export default function SummaryCards({
             <div className="min-w-0">
               <p className="text-xs font-medium mb-1 text-[var(--color-text-secondary)] tracking-wide uppercase">{balanceLabel}</p>
               <h3 className="text-lg md:text-xl font-medium text-[var(--color-text)] tracking-tight break-all leading-tight">
-                {formatCurrency(totalBalance)}
+                {formatCurrency(balance.effective)}
               </h3>
             </div>
             <div className="w-9 h-9 rounded-md border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-secondary)]">
               <DollarSign size={18} />
             </div>
           </div>
+          <PredictedRow value={balance.predicted} />
         </div>
       </div>
     </div>
