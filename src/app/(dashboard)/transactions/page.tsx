@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, TrendingUp, TrendingDown, Pencil, Trash2, PieChart, CheckCircle, CreditCard as CreditCardIcon, ChevronDown, ChevronUp, Banknote } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Plus, TrendingUp, TrendingDown, Pencil, Trash2, PieChart, CheckCircle, CreditCard as CreditCardIcon, ChevronDown, ChevronUp, Banknote, X, Crown, PiggyBank } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import TransactionsFilters from '@/components/transactions/TransactionsFilters';
-import TransactionModal from '@/components/transactions/TransactionModal';
+import IncomeTransactionModal from '@/components/transactions/IncomeTransactionModal';
+import ExpenseTransactionModal from '@/components/transactions/ExpenseTransactionModal';
+import InvestmentTransactionModal from '@/components/transactions/InvestmentTransactionModal';
 import { Transaction, CreditCard, CreditCardTransaction } from '@/types';
 import SummaryCards from '@/components/summary/SummaryCards';
 import {
@@ -19,13 +21,23 @@ import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useCreditCards } from '@/hooks/useCreditCards';
 import CreditCardTransactionModal from '@/components/credit-cards/CreditCardTransactionModal';
 import TotalBalanceBanner from '@/components/summary/TotalBalanceBanner';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPremiumFamily } from '@/utils/billing';
 
 export default function TransactionsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { family } = useAuth();
+  const isPremium = isPremiumFamily(family);
+
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [isFabOpen, setIsFabOpen] = useState(false);
+  const [isCardSelectOpen, setIsCardSelectOpen] = useState(false);
+  const fabRef = useRef<HTMLDivElement>(null);
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
@@ -96,11 +108,19 @@ export default function TransactionsPage() {
 
   const openEditModal = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    setIsModalOpen(true);
+    if (transaction.type === 'income') {
+      setIsIncomeModalOpen(true);
+    } else if (transaction.type === 'expense') {
+      setIsExpenseModalOpen(true);
+    } else if (transaction.type === 'investment') {
+      setIsInvestmentModalOpen(true);
+    }
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setIsIncomeModalOpen(false);
+    setIsExpenseModalOpen(false);
+    setIsInvestmentModalOpen(false);
     setEditingTransaction(null);
   };
 
@@ -246,7 +266,7 @@ export default function TransactionsPage() {
           {transactions.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-[var(--color-text-muted)] mb-4">Nenhuma transação encontrada</p>
-              <Button onClick={() => setIsModalOpen(true)} variant="outline">
+              <Button onClick={() => setIsExpenseModalOpen(true)} variant="outline">
                 Criar primeira transação
               </Button>
             </div>
@@ -488,20 +508,143 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-[var(--color-action)] text-white rounded-md shadow-md hover:bg-[var(--color-action-dark)] transition-all hover:scale-105 cursor-pointer flex items-center justify-center z-50"
-      >
-        <Plus size={32} />
-      </button>
+      {/* FAB Menu */}
+      <div ref={fabRef} className="fixed bottom-8 right-8 z-50">
+        {/* Menu options */}
+        {isFabOpen && (
+          <>
+            {/* Backdrop */}
+            <div className="fixed inset-0 z-40" onClick={() => setIsFabOpen(false)} />
+            <div className="absolute bottom-16 right-0 mb-2 flex flex-col gap-2 items-end z-50">
+              {/* Despesa Cartão */}
+              {creditCards && creditCards.length > 0 && (
+                <button
+                  onClick={() => {
+                    setIsFabOpen(false);
+                    if (creditCards.length === 1) {
+                      setCcTransactionModalCard(creditCards[0]);
+                    } else {
+                      setIsCardSelectOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md shadow-lg hover:bg-[var(--color-bg-elevated)] transition-all whitespace-nowrap cursor-pointer animate-[fadeInUp_0.15s_ease-out]"
+                >
+                  <div className="w-8 h-8 rounded-md bg-[var(--color-warning)]/10 flex items-center justify-center text-[var(--color-warning)]">
+                    <CreditCardIcon size={16} />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--color-text)]">Despesa Cartão</span>
+                </button>
+              )}
 
-      {/* Create/Edit Transaction Modal */}
-      <TransactionModal
-        isOpen={isModalOpen}
+              {/* Aporte (Premium) */}
+              {isPremium && (
+                <button
+                  onClick={() => {
+                    setIsFabOpen(false);
+                    setEditingTransaction(null);
+                    setIsInvestmentModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md shadow-lg hover:bg-[var(--color-bg-elevated)] transition-all whitespace-nowrap cursor-pointer animate-[fadeInUp_0.1s_ease-out]"
+                >
+                  <div className="w-8 h-8 rounded-md bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+                    <PiggyBank size={16} />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--color-text)]">Aporte</span>
+                </button>
+              )}
+
+              {/* Despesa */}
+              <button
+                onClick={() => {
+                  setIsFabOpen(false);
+                  setEditingTransaction(null);
+                  setIsExpenseModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md shadow-lg hover:bg-[var(--color-bg-elevated)] transition-all whitespace-nowrap cursor-pointer animate-[fadeInUp_0.05s_ease-out]"
+              >
+                <div className="w-8 h-8 rounded-md bg-[var(--color-danger)]/10 flex items-center justify-center text-[var(--color-danger)]">
+                  <TrendingDown size={16} />
+                </div>
+                <span className="text-sm font-medium text-[var(--color-text)]">Despesa</span>
+              </button>
+
+              {/* Receita */}
+              <button
+                onClick={() => {
+                  setIsFabOpen(false);
+                  setEditingTransaction(null);
+                  setIsIncomeModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md shadow-lg hover:bg-[var(--color-bg-elevated)] transition-all whitespace-nowrap cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-md bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)]">
+                  <TrendingUp size={16} />
+                </div>
+                <span className="text-sm font-medium text-[var(--color-text)]">Receita</span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* FAB Button */}
+        <button
+          onClick={() => setIsFabOpen(!isFabOpen)}
+          className={`w-14 h-14 bg-[var(--color-action)] text-white rounded-md shadow-md hover:bg-[var(--color-action-dark)] transition-all hover:scale-105 cursor-pointer flex items-center justify-center ${isFabOpen ? 'rotate-45' : ''}`}
+        >
+          <Plus size={32} />
+        </button>
+      </div>
+
+      {/* Type-specific Transaction Modals */}
+      <IncomeTransactionModal
+        isOpen={isIncomeModalOpen}
         onClose={closeModal}
-        transactionToEdit={editingTransaction}
+        transactionToEdit={editingTransaction?.type === 'income' ? editingTransaction : null}
       />
+      <ExpenseTransactionModal
+        isOpen={isExpenseModalOpen}
+        onClose={closeModal}
+        transactionToEdit={editingTransaction?.type === 'expense' ? editingTransaction : null}
+      />
+      <InvestmentTransactionModal
+        isOpen={isInvestmentModalOpen}
+        onClose={closeModal}
+        transactionToEdit={editingTransaction?.type === 'investment' ? editingTransaction : null}
+      />
+
+      {/* Card Selection Modal */}
+      <Modal
+        isOpen={isCardSelectOpen}
+        onClose={() => setIsCardSelectOpen(false)}
+        title="Selecione o Cartão"
+        size="sm"
+      >
+        <div className="space-y-2">
+          {creditCards?.map((card) => (
+            <button
+              key={card._id}
+              onClick={() => {
+                setIsCardSelectOpen(false);
+                setCcTransactionModalCard(card);
+              }}
+              className="w-full flex items-center gap-3 p-3 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+            >
+              <div
+                className="w-10 h-10 rounded-md flex items-center justify-center text-white"
+                style={{ backgroundColor: card.color }}
+              >
+                <CreditCardIcon size={20} />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-[var(--color-text)]">{card.name}</p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  Fatura atual: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(card.invoice?.totalAmount ?? 0)}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </Modal>
 
       {/* Credit Card Transaction Modal */}
       {ccTransactionModalCard && (
