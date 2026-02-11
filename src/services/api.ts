@@ -274,4 +274,73 @@ export const transactionService = {
   },
 };
 
+export const creditCardService = {
+  list: async (params?: { month?: number; year?: number }) => {
+    const response = await api.get('/credit-cards', { params });
+    return response.data;
+  },
+
+  create: async (data: {
+    name: string;
+    limit: number;
+    currentInvoiceAmount?: number;
+    brand: string;
+    closingDay: number;
+    dueDay: number;
+    color: string;
+    bankAccountId: string;
+  }) => {
+    const response = await api.post('/credit-cards', data);
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: {
+      name?: string;
+      limit?: number;
+      brand?: string;
+      closingDay?: number;
+      dueDay?: number;
+      color?: string;
+      bankAccountId?: string;
+    }
+  ) => {
+    const response = await api.put(`/credit-cards/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete(`/credit-cards/${id}`);
+    return response.data;
+  },
+
+  createTransaction: async (
+    cardId: string,
+    data: {
+      description: string;
+      amount: number;
+      categoryId: string;
+      type: 'single' | 'installment' | 'fixed';
+      installments?: number;
+      date?: string;
+    }
+  ) => {
+    const response = await api.post(`/credit-cards/${cardId}/transactions`, data);
+    return response.data;
+  },
+
+  deleteTransaction: async (cardId: string, transactionId: string, deleteMode?: 'all') => {
+    const response = await api.delete(`/credit-cards/${cardId}/transactions/${transactionId}`, {
+      params: deleteMode ? { deleteMode } : {},
+    });
+    return response.data;
+  },
+
+  payInvoice: async (cardId: string, month: number, year: number) => {
+    const response = await api.post(`/credit-cards/${cardId}/invoices/pay`, { month, year });
+    return response.data;
+  },
+};
+
 export default api;

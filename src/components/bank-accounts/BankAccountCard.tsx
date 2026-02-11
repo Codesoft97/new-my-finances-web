@@ -11,7 +11,7 @@ interface BankAccountCardProps {
 }
 
 const TYPE_ICONS = {
-  checking: CreditCard,
+  checking: Landmark,
   payment: Smartphone,
   salary: Briefcase,
   savings: PiggyBank,

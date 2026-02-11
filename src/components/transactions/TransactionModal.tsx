@@ -24,6 +24,7 @@ interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   transactionToEdit?: Transaction | null;
+  defaultType?: 'income' | 'expense' | 'investment';
 }
 
 interface TransactionFormData {
@@ -38,7 +39,7 @@ interface TransactionFormData {
   date: string;
 }
 
-export default function TransactionModal({ isOpen, onClose, transactionToEdit }: TransactionModalProps) {
+export default function TransactionModal({ isOpen, onClose, transactionToEdit, defaultType }: TransactionModalProps) {
   const router = useRouter();
   const { family } = useAuth();
 
@@ -66,7 +67,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
     defaultValues: {
       description: '',
       amount: '',
-      type: 'expense',
+      type: defaultType || 'expense',
       categoryId: '',
       goalId: '',
       bankAccountId: '',
@@ -102,7 +103,7 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
       reset({
         description: '',
         amount: '',
-        type: 'expense',
+        type: defaultType || 'expense',
         categoryId: '',
         goalId: '',
         bankAccountId: '',
@@ -211,32 +212,32 @@ export default function TransactionModal({ isOpen, onClose, transactionToEdit }:
         {/* Effectivate on creation */}
         {!transactionToEdit && (
           <div className="flex items-start gap-3 p-3 bg-[var(--color-bg-elevated)] rounded-md border border-[var(--color-border)]">
-          <input
-            type="checkbox"
-            id="isEffective"
-            {...register('isEffective')}
-            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded-sm focus:ring-[var(--color-primary)] cursor-pointer mt-1"
-          />
-          <label htmlFor="isEffective" className="cursor-pointer">
-            <span className="font-medium text-[var(--color-text)]">
-              Efetivar transação agora
-            </span>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Ao efetivar, a transação impacta saldo da conta e objetivos.
-            </p>
-            {isFixedTransaction && transactionType !== 'investment' && (
-              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-                Para transações fixas, apenas a primeira transação será efetivada.
+            <input
+              type="checkbox"
+              id="isEffective"
+              {...register('isEffective')}
+              className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded-sm focus:ring-[var(--color-primary)] cursor-pointer mt-1"
+            />
+            <label htmlFor="isEffective" className="cursor-pointer">
+              <span className="font-medium text-[var(--color-text)]">
+                Efetivar transação agora
+              </span>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Ao efetivar, a transação impacta saldo da conta e objetivos.
               </p>
-            )}
-          </label>
-        </div>
-      )}
+              {isFixedTransaction && transactionType !== 'investment' && (
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  Para transações fixas, apenas a primeira transação será efetivada.
+                </p>
+              )}
+            </label>
+          </div>
+        )}
 
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          Tipo
-        </label>
+        <div>
+          <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
+            Tipo
+          </label>
           <div className={`grid ${showInvestmentOption ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
             <label className={`
               flex items-center justify-center gap-2 p-3 border rounded-md cursor-pointer transition-colors

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Target, Trash2, Pencil, Crown } from 'lucide-react';
+import { Plus, Target, Trash2, Pencil, Crown, MoreVertical } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -19,6 +19,9 @@ const GOAL_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B
 export default function GoalsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
   const { family, loading: authLoading, refreshFamily } = useAuth();
   const router = useRouter();
   const isPremium = isPremiumFamily(family);
@@ -94,13 +97,15 @@ export default function GoalsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este objetivo?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (error) {
-        alert('Erro ao excluir objetivo');
-      }
+  const handleDelete = async () => {
+    if (!deletingGoal) return;
+    const goalId = deletingGoal.id || deletingGoal._id;
+    try {
+      await deleteMutation.mutateAsync(goalId);
+      setIsDeleteModalOpen(false);
+      setDeletingGoal(null);
+    } catch (error) {
+      alert('Erro ao excluir objetivo');
     }
   };
 
@@ -216,27 +221,46 @@ export default function GoalsPage() {
                       <h3 className="text-base font-medium text-[var(--color-text)] mb-1">{goal.description}</h3>
                       <p className="text-sm text-[var(--color-text-muted)]">Meta: {formatDate(goal.targetDate)}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="relative">
                       <button
-                        onClick={() => handleEdit(goal)}
-                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] cursor-pointer transition-colors rounded-md hover:bg-[var(--color-bg-elevated)]"
-                        title="Editar"
+                        onClick={() => setMenuOpenId(menuOpenId === goalId ? null : goalId)}
+                        onBlur={() => setTimeout(() => setMenuOpenId(null), 200)}
+                        className="p-2 -mr-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-md transition-colors"
                       >
-                        <Pencil size={18} />
+                        <MoreVertical size={20} />
                       </button>
-                      <button
-                        onClick={() => handleDelete(goalId)}
-                        className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] cursor-pointer transition-colors rounded-md hover:bg-[var(--color-bg-elevated)]"
-                        title="Excluir"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center ml-2"
-                        style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
-                      >
-                        <Target size={20} />
-                      </div>
+
+                      {menuOpenId === goalId && (
+                        <div className="absolute right-0 mt-2 w-36 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-md shadow-sm z-10 overflow-hidden">
+                          <button
+                            onClick={() => {
+                              handleEdit(goal);
+                              setMenuOpenId(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-[var(--color-text)] cursor-pointer hover:bg-[var(--color-bg-card)] transition-colors text-left"
+                          >
+                            <Pencil size={16} />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDeletingGoal(goal);
+                              setIsDeleteModalOpen(true);
+                              setMenuOpenId(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-[var(--color-danger)] cursor-pointer hover:bg-[var(--color-danger)]/10 transition-colors text-left"
+                          >
+                            <Trash2 size={16} />
+                            Excluir
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center ml-2"
+                      style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
+                    >
+                      <Target size={20} />
                     </div>
                   </div>
 
@@ -371,6 +395,42 @@ export default function GoalsPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setDeletingGoal(null); }}
+        title="Excluir Objetivo"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--color-text-secondary)]">
+            Tem certeza que deseja excluir o objetivo <strong className="text-[var(--color-text)]">{deletingGoal?.description}</strong>?
+          </p>
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Esta ação não pode ser desfeita. O progresso acumulado será perdido.
+          </p>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              onClick={() => { setIsDeleteModalOpen(false); setDeletingGoal(null); }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              fullWidth
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
