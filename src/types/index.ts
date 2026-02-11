@@ -62,6 +62,55 @@ export interface BankAccount {
   updatedAt: string;
 }
 
+export interface CreditCardTransaction {
+  _id: string;
+  description: string;
+  amount: number;
+  installmentAmount: number;
+  categoryId?: Category;
+  creditCardId: string;
+  userId: string;
+  familyId: string;
+  date: string;
+  type: 'single' | 'installment' | 'fixed';
+  installments: number;
+  currentInstallment: number;
+  installmentGroupId: string | null;
+  fixedGroupId: string | null;
+  invoiceMonth: number;
+  invoiceYear: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreditCardInvoice {
+  month: number;
+  year: number;
+  totalAmount: number;
+  isPaid: boolean;
+  paidAt?: string;
+  transactions: CreditCardTransaction[];
+}
+
+export interface CreditCard {
+  _id: string;
+  name: string;
+  limit: number;
+  currentInvoiceAmount: number;
+  brand: 'mastercard' | 'visa' | 'elo' | 'outro';
+  closingDay: number;
+  dueDay: number;
+  color: string;
+  bankAccountId: BankAccount;
+  familyId: string;
+  createdBy: string;
+  paidInvoices: { month: number; year: number; paidAt: string }[];
+  availableLimit: number;
+  invoice: CreditCardInvoice;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   _id: string;
   description: string;
