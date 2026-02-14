@@ -15,6 +15,8 @@ import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useGoals } from '@/hooks/useGoals';
 import { useCreateTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
 import { isPremiumFamily } from '@/utils/billing';
+import { toast } from 'sonner';
+import { toastApiError } from '@/utils/notifications';
 import { Transaction } from '@/types';
 
 interface InvestmentTransactionModalProps {
@@ -84,7 +86,7 @@ export default function InvestmentTransactionModal({ isOpen, onClose, transactio
   const onSubmit = async (data: FormData) => {
     try {
       if (!canUseGoals) {
-        alert('Objetivos estão disponíveis apenas no Plano Premium');
+        toast.warning('Objetivos estao disponiveis apenas no Plano Premium');
         return;
       }
 
@@ -112,8 +114,8 @@ export default function InvestmentTransactionModal({ isOpen, onClose, transactio
         });
       }
       handleClose();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao salvar aporte');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao salvar aporte');
     }
   };
 

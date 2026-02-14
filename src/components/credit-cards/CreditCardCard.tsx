@@ -18,6 +18,7 @@ import CreditCardModal from './CreditCardModal';
 import CreditCardTransactionModal from './CreditCardTransactionModal';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { toastApiError } from '@/utils/notifications';
 
 interface CreditCardCardProps {
   card: CreditCard;
@@ -50,8 +51,8 @@ export default function CreditCardCard({ card }: CreditCardCardProps) {
     try {
       await deleteCreditCard.mutateAsync(card._id);
       setIsDeleteOpen(false);
-    } catch (error: any) {
-      alert(error?.response?.data?.message || 'Erro ao excluir cartão.');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao excluir cartao.');
     }
   };
 
@@ -64,8 +65,8 @@ export default function CreditCardCard({ card }: CreditCardCardProps) {
         deleteMode: deleteTarget.mode,
       });
       setDeleteTarget(null);
-    } catch (error: any) {
-      alert(error?.response?.data?.message || 'Erro ao excluir transação.');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao excluir transacao.');
     }
   };
 
@@ -77,8 +78,8 @@ export default function CreditCardCard({ card }: CreditCardCardProps) {
         year: invoice.year,
       });
       setIsPayOpen(false);
-    } catch (error: any) {
-      alert(error?.response?.data?.message || 'Erro ao pagar fatura.');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao pagar fatura.');
     }
   };
 
@@ -90,11 +91,10 @@ export default function CreditCardCard({ card }: CreditCardCardProps) {
 
   return (
     <>
-      <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md overflow-hidden">
-        {/* Card color top bar */}
-        <div className="h-1.5" style={{ backgroundColor: card.color }} />
-
-        <div className="p-4">
+      <div 
+        className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md p-4 overflow-hidden border-l-2"
+        style={{ borderLeftColor: card.color }}
+      >
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -279,7 +279,6 @@ export default function CreditCardCard({ card }: CreditCardCardProps) {
               ))}
             </div>
           )}
-        </div>
       </div>
 
       {/* Edit Modal */}
