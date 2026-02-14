@@ -5,6 +5,8 @@ import EditBankAccountModal from './EditBankAccountModal';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { toast } from 'sonner';
+import { toastApiError } from '@/utils/notifications';
 
 interface BankAccountCardProps {
   account: BankAccount;
@@ -34,14 +36,14 @@ export default function BankAccountCard({ account }: BankAccountCardProps) {
 
   const handleDelete = async () => {
     if (isPrimary) {
-      alert('A primeira conta cadastrada nao pode ser deletada.');
+      toast.warning('A primeira conta cadastrada nao pode ser deletada.');
       return;
     }
     try {
       await deleteBankAccount.mutateAsync(account._id);
       setIsDeleteModalOpen(false);
-    } catch (error: any) {
-      alert(error?.response?.data?.message || 'Erro ao excluir conta.');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao excluir conta.');
     }
   };
 

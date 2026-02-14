@@ -20,7 +20,8 @@ import {
   ChevronDown,
   Landmark,
   CreditCard,
-  Settings
+  Settings,
+  Wallet
 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,7 +55,10 @@ export default function Sidebar() {
     { icon: FolderOpen, label: 'Categorias', href: '/categories' },
     { icon: Landmark, label: 'Contas', href: '/bank-accounts' },
     { icon: CreditCard, label: 'Cartões', href: '/credit-cards' },
-    ...(isPremium ? [{ icon: Target, label: 'Objetivos', href: '/goals' }] : []),
+    ...(isPremium ? [
+      { icon: Target, label: 'Objetivos', href: '/goals' },
+      { icon: Wallet, label: 'Limites', href: '/spending-limits' },
+    ] : []),
     { icon: Settings, label: 'Configurações', href: '/settings' },
   ];
 

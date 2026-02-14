@@ -4,6 +4,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import GoogleAuthProvider from '@/providers/GoogleAuthProvider';
+import AppToaster from '@/components/ui/AppToaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
             <ThemeProvider>
               <AuthProvider>
                 {children}
+                <AppToaster />
               </AuthProvider>
             </ThemeProvider>
           </QueryProvider>
