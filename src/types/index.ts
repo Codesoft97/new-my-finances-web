@@ -34,6 +34,33 @@ export interface Category {
   updatedAt: string;
 }
 
+export interface SpendingLimitCategory {
+  id?: string;
+  _id?: string;
+  name: string;
+  color: string;
+  type?: 'income' | 'expense' | 'investment';
+}
+
+export interface SpendingLimit {
+  id?: string;
+  _id?: string;
+  seriesId?: string | null;
+  amount: number;
+  spentAmount?: number;
+  periodYear?: number;
+  periodMonth?: number;
+  category?: SpendingLimitCategory;
+  categoryId?: string | SpendingLimitCategory;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  userId?: string;
+  familyId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Goal {
   _id: string; // Mongoose default
   id?: string;  // API response variant

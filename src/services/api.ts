@@ -1,4 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
+import { toastApiError, wasApiErrorToastShown } from '@/utils/notifications';
 
 // Check if secure auth is enabled (httpOnly cookies + CSRF)
 const isSecureAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_SECURE_AUTH === 'true';
@@ -66,8 +67,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
+      const method = error.config?.method?.toLowerCase();
+      const isMutatingRequest = ['post', 'put', 'delete', 'patch'].includes(method || '');
+
+      if (isMutatingRequest && !wasApiErrorToastShown(error)) {
+        toastApiError(error, 'Nao foi possivel concluir a operacao. Tente novamente.');
+      }
+
+      if (error.response?.status === 401) {
         // Clear auth state
         if (!isSecureAuthEnabled) {
           localStorage.removeItem('token');
@@ -78,6 +86,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
     return Promise.reject(error);
   }
 );
@@ -158,6 +167,36 @@ export const categoryService = {
 
   delete: async (id: string) => {
     const response = await api.delete(`/categories/${id}`);
+    return response.data;
+  },
+};
+
+export const spendingLimitService = {
+  list: async () => {
+    const response = await api.get('/spending-limits');
+    return response.data;
+  },
+
+  create: async (data: { amount: number; categoryId: string; startDate: string; endDate: string }) => {
+    const response = await api.post('/spending-limits', data);
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: {
+      amount?: number;
+      categoryId?: string;
+      startDate?: string;
+      endDate?: string;
+    }
+  ) => {
+    const response = await api.put(`/spending-limits/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete(`/spending-limits/${id}`);
     return response.data;
   },
 };

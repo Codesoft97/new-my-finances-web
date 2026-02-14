@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Plus, CreditCard as CreditCardIcon } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useCreditCards } from '@/hooks/useCreditCards';
 import CreditCardModal from '@/components/credit-cards/CreditCardModal';
 import CreditCardCard from '@/components/credit-cards/CreditCardCard';
 import Button from '@/components/ui/Button';
+import MonthSelector from '@/components/ui/MonthSelector';
 
 export default function CreditCardsPage() {
   const now = new Date();
@@ -13,29 +14,6 @@ export default function CreditCardsPage() {
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const { creditCards, isLoading } = useCreditCards(selectedMonth, selectedYear);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-
-  const MONTHS = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-  ];
-
-  const handlePrevMonth = () => {
-    if (selectedMonth === 1) {
-      setSelectedMonth(12);
-      setSelectedYear((y) => y - 1);
-    } else {
-      setSelectedMonth((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 12) {
-      setSelectedMonth(1);
-      setSelectedYear((y) => y + 1);
-    } else {
-      setSelectedMonth((m) => m + 1);
-    }
-  };
 
   return (
     <div className="p-4 md:p-8">
@@ -56,22 +34,15 @@ export default function CreditCardsPage() {
         </div>
 
         {/* Month Selector */}
-        <div className="flex items-center justify-end gap-3">
-          <button
-            onClick={handlePrevMonth}
-            className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-elevated)] rounded-md transition-colors cursor-pointer"
-          >
-            ‹
-          </button>
-          <span className="text-sm font-medium text-[var(--color-text)] min-w-[140px] text-center">
-            {MONTHS[selectedMonth - 1]} {selectedYear}
-          </span>
-          <button
-            onClick={handleNextMonth}
-            className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-elevated)] rounded-md transition-colors cursor-pointer"
-          >
-            ›
-          </button>
+        <div className="mb-6 bg-[var(--color-bg-card)] rounded-md border border-[var(--color-border)] p-3">
+          <MonthSelector
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onMonthChange={(month, year) => {
+              setSelectedMonth(month);
+              setSelectedYear(year);
+            }}
+          />
         </div>
 
         {/* Content */}

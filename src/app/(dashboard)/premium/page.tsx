@@ -28,6 +28,7 @@ const PRICING: Record<PlanId, { title: string; price: string; period: string; hi
 const FEATURES = [
   'Criação de objetivos financeiros',
   'Acompanhamento do progresso das metas',
+  'Limites de gastos por categoria',
 ];
 
 export default function PremiumPage() {

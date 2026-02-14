@@ -9,6 +9,8 @@ import Modal from '@/components/ui/Modal';
 import ColorPicker from '@/components/ui/ColorPicker';
 import { Category } from '@/types';
 import { useCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useCategories';
+import { toast } from 'sonner';
+import { toastApiError } from '@/utils/notifications';
 
 const COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16',
@@ -59,14 +61,14 @@ export default function CategoriesPage() {
       setSelectedColor(COLORS[0]);
       setSelectedType('expense');
       setSelectedEssential(false);
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao criar categoria');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao criar categoria');
     }
   };
 
   const handleDeleteClick = (category: Category) => {
     if (isProtectedCategory(category)) {
-      alert(getProtectedCategoryMessage(category));
+      toast.warning(getProtectedCategoryMessage(category));
       return;
     }
     setCategoryToDelete(category);
@@ -76,7 +78,7 @@ export default function CategoriesPage() {
   const confirmDelete = async () => {
     if (!categoryToDelete) return;
     if (isProtectedCategory(categoryToDelete)) {
-      alert(getProtectedCategoryMessage(categoryToDelete));
+      toast.warning(getProtectedCategoryMessage(categoryToDelete));
       setIsDeleteModalOpen(false);
       setCategoryToDelete(null);
       return;
@@ -86,8 +88,8 @@ export default function CategoriesPage() {
       await deleteMutation.mutateAsync(categoryToDelete._id);
       setIsDeleteModalOpen(false);
       setCategoryToDelete(null);
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao deletar categoria');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao deletar categoria');
     }
   };
 

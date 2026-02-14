@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { TrendingDown } from 'lucide-react';
 
@@ -9,10 +9,15 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import SpendingLimitImpactNotice from '@/components/transactions/SpendingLimitImpactNotice';
 import { useCategories } from '@/hooks/useCategories';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useSpendingLimits } from '@/hooks/useSpendingLimits';
 import { useCreateTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
-import { Transaction } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPremiumFamily } from '@/utils/billing';
+import { toastApiError } from '@/utils/notifications';
+import { SpendingLimit, Transaction } from '@/types';
 
 interface ExpenseTransactionModalProps {
   isOpen: boolean;
@@ -30,9 +35,79 @@ interface FormData {
   date: string;
 }
 
+interface NormalizedSpendingLimit {
+  id: string;
+  seriesId: string | null;
+  amount: number;
+  spentAmount: number;
+  categoryId: string;
+  periodYear?: number;
+  periodMonth?: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+}
+
+const toInputDate = (value: string) => {
+  if (!value) return '';
+  return value.split('T')[0];
+};
+
+const getCategoryIdFromSpendingLimit = (limit: SpendingLimit) => {
+  if (typeof limit.categoryId === 'string') return limit.categoryId;
+  if (limit.category?.id) return limit.category.id;
+  if (limit.category?._id) return limit.category._id;
+  if (typeof limit.categoryId === 'object' && limit.categoryId !== null) {
+    if (limit.categoryId.id) return limit.categoryId.id;
+    if (limit.categoryId._id) return limit.categoryId._id;
+  }
+  return '';
+};
+
+const normalizeSpendingLimit = (limit: SpendingLimit): NormalizedSpendingLimit | null => {
+  const id = limit.id || limit._id;
+  const categoryId = getCategoryIdFromSpendingLimit(limit);
+  if (!id || !categoryId) return null;
+
+  return {
+    id,
+    seriesId: typeof limit.seriesId === 'string' || limit.seriesId === null ? limit.seriesId : null,
+    amount: limit.amount,
+    spentAmount: typeof limit.spentAmount === 'number' ? limit.spentAmount : 0,
+    categoryId,
+    periodYear: typeof limit.periodYear === 'number' ? limit.periodYear : undefined,
+    periodMonth: typeof limit.periodMonth === 'number' ? limit.periodMonth : undefined,
+    startDate: toInputDate(limit.startDate),
+    endDate: toInputDate(limit.endDate),
+    isActive: Boolean(limit.isActive),
+  };
+};
+
+const isDateInRange = (date: string, startDate: string, endDate: string) => {
+  if (!date || !startDate || !endDate) return false;
+  return date >= startDate && date <= endDate;
+};
+
+const getDateYearMonth = (date: string) => {
+  const [yearString, monthString] = date.split('-');
+  const year = Number(yearString);
+  const month = Number(monthString);
+
+  if (!Number.isInteger(year) || !Number.isInteger(month)) {
+    return null;
+  }
+
+  return { year, month };
+};
+
 export default function ExpenseTransactionModal({ isOpen, onClose, transactionToEdit }: ExpenseTransactionModalProps) {
+  const { family } = useAuth();
+  const isPremium = isPremiumFamily(family);
   const { data: categoriesData } = useCategories();
   const { bankAccounts } = useBankAccounts();
+  const { data: spendingLimitsData } = useSpendingLimits({
+    enabled: isPremium && isOpen && !transactionToEdit,
+  });
   const createMutation = useCreateTransaction();
   const updateMutation = useUpdateTransaction();
 
@@ -53,6 +128,62 @@ export default function ExpenseTransactionModal({ isOpen, onClose, transactionTo
   });
 
   const isFixedTransaction = watch('isFixed');
+  const selectedCategoryId = watch('categoryId');
+  const selectedDate = watch('date');
+  const amountValue = watch('amount');
+  const expenseAmount = parseFloat(amountValue || '0');
+
+  const relevantSpendingLimit = useMemo(() => {
+    if (!selectedCategoryId) return null;
+
+    const parsedDate = getDateYearMonth(selectedDate);
+    const spendingLimits = (spendingLimitsData?.spendingLimits ?? [])
+      .map(normalizeSpendingLimit)
+      .filter((limit): limit is NormalizedSpendingLimit => limit !== null)
+      .filter((limit) => limit.categoryId === selectedCategoryId);
+
+    if (spendingLimits.length === 0) return null;
+
+    const hasMonthlyData = spendingLimits.some(
+      (limit) => typeof limit.periodYear === 'number' && typeof limit.periodMonth === 'number'
+    );
+
+    if (hasMonthlyData) {
+      if (!parsedDate) return null;
+
+      const monthlyMatch = spendingLimits.find(
+        (limit) => limit.periodYear === parsedDate.year && limit.periodMonth === parsedDate.month
+      );
+      return monthlyMatch || null;
+    }
+
+    const legacyRangeMatch = spendingLimits.find((limit) =>
+      isDateInRange(selectedDate, limit.startDate, limit.endDate)
+    );
+    if (legacyRangeMatch) return legacyRangeMatch;
+
+    const activeLimit = spendingLimits.find((limit) => limit.isActive);
+    if (activeLimit) return activeLimit;
+
+    const sortedByPeriodDesc = [...spendingLimits].sort((a, b) => {
+      const yearDiff = (b.periodYear ?? 0) - (a.periodYear ?? 0);
+      if (yearDiff !== 0) return yearDiff;
+
+      const monthDiff = (b.periodMonth ?? 0) - (a.periodMonth ?? 0);
+      if (monthDiff !== 0) return monthDiff;
+
+      return b.endDate.localeCompare(a.endDate);
+    });
+
+    return sortedByPeriodDesc[0];
+  }, [selectedCategoryId, selectedDate, spendingLimitsData?.spendingLimits]);
+
+  const showSpendingLimitImpact =
+    !transactionToEdit &&
+    isPremium &&
+    Boolean(relevantSpendingLimit) &&
+    Number.isFinite(expenseAmount) &&
+    expenseAmount > 0;
 
   useEffect(() => {
     if (transactionToEdit) {
@@ -105,8 +236,8 @@ export default function ExpenseTransactionModal({ isOpen, onClose, transactionTo
         });
       }
       handleClose();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao salvar despesa');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao salvar despesa');
     }
   };
 
@@ -228,6 +359,15 @@ export default function ExpenseTransactionModal({ isOpen, onClose, transactionTo
             />
           </div>
         </div>
+
+        {showSpendingLimitImpact && relevantSpendingLimit && (
+          <SpendingLimitImpactNotice
+            categoryName={categories.find((category) => category._id === selectedCategoryId)?.name || 'Categoria'}
+            limitAmount={relevantSpendingLimit.amount}
+            spentAmount={relevantSpendingLimit.spentAmount}
+            nextExpenseAmount={expenseAmount}
+          />
+        )}
 
         {/* Fixed checkbox */}
         {!transactionToEdit && (

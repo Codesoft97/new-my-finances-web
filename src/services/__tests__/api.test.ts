@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { authService, categoryService, transactionService } from '../api';
+import { authService, categoryService, spendingLimitService, transactionService } from '../api';
 
 // Mock axios
 jest.mock('axios', () => {
@@ -286,6 +286,98 @@ describe('API Services', () => {
         const result = await transactionService.delete('trans123', 'all');
 
         expect(mockedAxios.delete).toHaveBeenCalledWith('/transactions/trans123', { params: { deleteMode: 'all' } });
+        expect(result).toEqual(response.data);
+      });
+    });
+  });
+
+  describe('spendingLimitService', () => {
+    describe('list', () => {
+      it('sends GET request to fetch spending limits', async () => {
+        const response = {
+          data: {
+            spendingLimits: [
+              {
+                id: 'limit-1',
+                seriesId: 'series-1',
+                amount: 500,
+                spentAmount: 180,
+                periodYear: 2026,
+                periodMonth: 2,
+                category: { id: 'cat-1', name: 'Food', color: '#ef4444' },
+                startDate: '2026-02-01T00:00:00.000Z',
+                endDate: '2026-02-28T00:00:00.000Z',
+                isActive: true,
+              },
+            ],
+          },
+        };
+        mockedAxios.get.mockResolvedValueOnce(response);
+
+        const result = await spendingLimitService.list();
+
+        expect(mockedAxios.get).toHaveBeenCalledWith('/spending-limits');
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('create', () => {
+      it('sends POST request with spending limit data', async () => {
+        const spendingLimitData = {
+          amount: 500,
+          categoryId: 'cat-1',
+          startDate: '2026-02-01',
+          endDate: '2026-04-30',
+        };
+        const response = {
+          data: {
+            spendingLimit: { _id: 'limit-1', ...spendingLimitData, isActive: true },
+            spendingLimits: [
+              { id: 'limit-1', seriesId: 'series-1', periodYear: 2026, periodMonth: 2, amount: 500, spentAmount: 0 },
+              { id: 'limit-2', seriesId: 'series-1', periodYear: 2026, periodMonth: 3, amount: 500, spentAmount: 0 },
+              { id: 'limit-3', seriesId: 'series-1', periodYear: 2026, periodMonth: 4, amount: 500, spentAmount: 0 },
+            ],
+            totalCreated: 3,
+          },
+        };
+        mockedAxios.post.mockResolvedValueOnce(response);
+
+        const result = await spendingLimitService.create(spendingLimitData);
+
+        expect(mockedAxios.post).toHaveBeenCalledWith('/spending-limits', spendingLimitData);
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('update', () => {
+      it('sends PUT request with spending limit id and partial data', async () => {
+        const updateData = { amount: 750, endDate: '2026-03-15' };
+        const response = {
+          data: {
+            _id: 'limit-1',
+            amount: 750,
+            startDate: '2026-02-01T00:00:00.000Z',
+            endDate: '2026-03-15T00:00:00.000Z',
+            isActive: true,
+          },
+        };
+        mockedAxios.put.mockResolvedValueOnce(response);
+
+        const result = await spendingLimitService.update('limit-1', updateData);
+
+        expect(mockedAxios.put).toHaveBeenCalledWith('/spending-limits/limit-1', updateData);
+        expect(result).toEqual(response.data);
+      });
+    });
+
+    describe('delete', () => {
+      it('sends DELETE request with spending limit id', async () => {
+        const response = { data: { message: 'Limite de gasto deletado com sucesso' } };
+        mockedAxios.delete.mockResolvedValueOnce(response);
+
+        const result = await spendingLimitService.delete('limit-1');
+
+        expect(mockedAxios.delete).toHaveBeenCalledWith('/spending-limits/limit-1');
         expect(result).toEqual(response.data);
       });
     });

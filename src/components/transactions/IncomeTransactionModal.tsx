@@ -12,6 +12,7 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import { useCategories } from '@/hooks/useCategories';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useCreateTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
+import { toastApiError } from '@/utils/notifications';
 import { Transaction } from '@/types';
 
 interface IncomeTransactionModalProps {
@@ -105,8 +106,8 @@ export default function IncomeTransactionModal({ isOpen, onClose, transactionToE
         });
       }
       handleClose();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao salvar receita');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao salvar receita');
     }
   };
 

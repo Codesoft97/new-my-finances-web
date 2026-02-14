@@ -13,6 +13,7 @@ import { Goal } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { isPremiumFamily } from '@/utils/billing';
 import { useRouter } from 'next/navigation';
+import { toastApiError } from '@/utils/notifications';
 
 const GOAL_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'];
 
@@ -68,8 +69,8 @@ export default function GoalsPage() {
         await createMutation.mutateAsync(goalData);
       }
       closeModal();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao salvar objetivo');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao salvar objetivo');
     }
   };
 
@@ -104,8 +105,8 @@ export default function GoalsPage() {
       await deleteMutation.mutateAsync(goalId);
       setIsDeleteModalOpen(false);
       setDeletingGoal(null);
-    } catch (error) {
-      alert('Erro ao excluir objetivo');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao excluir objetivo');
     }
   };
 
@@ -216,10 +217,18 @@ export default function GoalsPage() {
                   className="bg-[var(--color-bg-card)] rounded-md p-4 border border-[var(--color-border)] border-l-2"
                   style={{ borderLeftColor: goal.color }}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-base font-medium text-[var(--color-text)] mb-1">{goal.description}</h3>
-                      <p className="text-sm text-[var(--color-text-muted)]">Meta: {formatDate(goal.targetDate)}</p>
+                  <div className="flex justify-between items-start gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-md flex items-center justify-center"
+                        style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
+                      >
+                        <Target size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-medium text-[var(--color-text)]">{goal.description}</h3>
+                        <p className="text-xs text-[var(--color-text-muted)]">Meta: {formatDate(goal.targetDate)}</p>
+                      </div>
                     </div>
                     <div className="relative">
                       <button
@@ -256,12 +265,7 @@ export default function GoalsPage() {
                         </div>
                       )}
                     </div>
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center ml-2"
-                      style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
-                    >
-                      <Target size={20} />
-                    </div>
+                    
                   </div>
 
                   <div className="mb-4">
@@ -295,7 +299,7 @@ export default function GoalsPage() {
                   )}
 
                   <div className="mt-2 text-xs text-center bg-[var(--color-bg-elevated)] py-1 rounded px-2 text-[var(--color-text-secondary)]">
-                    Guardar por mes: <strong>{formatMonthlyNeeded(goal.aporteMensalNecessario)}</strong>
+                    Guardar por mês: <strong>{formatMonthlyNeeded(goal.aporteMensalNecessario)}</strong>
                   </div>
                 </div>
               );

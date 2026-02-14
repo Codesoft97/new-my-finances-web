@@ -23,6 +23,8 @@ import CreditCardTransactionModal from '@/components/credit-cards/CreditCardTran
 import TotalBalanceBanner from '@/components/summary/TotalBalanceBanner';
 import { useAuth } from '@/contexts/AuthContext';
 import { isPremiumFamily } from '@/utils/billing';
+import { toast } from 'sonner';
+import { toastApiError } from '@/utils/notifications';
 
 export default function TransactionsPage() {
   const { family } = useAuth();
@@ -159,8 +161,8 @@ export default function TransactionsPage() {
       });
       setIsDeleteModalOpen(false);
       setDeletingTransaction(null);
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao deletar transação');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao deletar transacao');
     }
   };
 
@@ -175,10 +177,10 @@ export default function TransactionsPage() {
         const updatedCount = response.updated?.length ?? 0;
         const skippedCount = response.skipped?.length ?? 0;
         const notFoundCount = response.notFound?.length ?? 0;
-        alert(`Efetivação concluída. ${updatedCount} atualizadas, ${skippedCount} já efetivas, ${notFoundCount} não encontradas.`);
+        toast.warning(`Efetivacao concluida. ${updatedCount} atualizadas, ${skippedCount} ja efetivas, ${notFoundCount} nao encontradas.`);
       }
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao efetivar transações');
+    } catch (error: unknown) {
+      toastApiError(error, 'Erro ao efetivar transacoes');
     }
   };
 
@@ -678,7 +680,7 @@ export default function TransactionsPage() {
                       try {
                         await deleteCardTransaction.mutateAsync({ cardId: deletingCcTx.card._id, transactionId: deletingCcTx.tx._id });
                         setDeletingCcTx(null);
-                      } catch (e: any) { alert(e?.response?.data?.message || 'Erro'); }
+                      } catch (e: unknown) { toastApiError(e, 'Erro'); }
                     }}
                     variant="secondary"
                     fullWidth
@@ -690,7 +692,7 @@ export default function TransactionsPage() {
                       try {
                         await deleteCardTransaction.mutateAsync({ cardId: deletingCcTx.card._id, transactionId: deletingCcTx.tx._id, deleteMode: 'all' });
                         setDeletingCcTx(null);
-                      } catch (e: any) { alert(e?.response?.data?.message || 'Erro'); }
+                      } catch (e: unknown) { toastApiError(e, 'Erro'); }
                     }}
                     variant="danger"
                     fullWidth
@@ -709,7 +711,7 @@ export default function TransactionsPage() {
                     try {
                       await deleteCardTransaction.mutateAsync({ cardId: deletingCcTx.card._id, transactionId: deletingCcTx.tx._id });
                       setDeletingCcTx(null);
-                    } catch (e: any) { alert(e?.response?.data?.message || 'Erro'); }
+                    } catch (e: unknown) { toastApiError(e, 'Erro'); }
                   }}
                 >
                   Excluir
@@ -744,7 +746,7 @@ export default function TransactionsPage() {
                   try {
                     await payInvoice.mutateAsync({ cardId: payingCard._id, month: selectedMonth, year: selectedYear });
                     setPayingCard(null);
-                  } catch (e: any) { alert(e?.response?.data?.message || 'Erro ao pagar fatura'); }
+                  } catch (e: unknown) { toastApiError(e, 'Erro ao pagar fatura'); }
                 }}
               >
                 Confirmar Pagamento
